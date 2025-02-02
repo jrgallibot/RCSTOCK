@@ -4,3 +4,4 @@ __pycache__
 *.pyc
 .env
 CACHE
+echo ".env" >> .gitignore
