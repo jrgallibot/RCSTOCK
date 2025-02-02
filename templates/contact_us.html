@@ -1,0 +1,129 @@
+{% extends 'landing.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="bold mt-5">Contact Us <i class="fas fa-phone mt-4"></i></h2>
+        <p class="w-responsive mx-auto mb-5">Do you have any questions? Please do not hesitate to contact us directly. Our team will come back to you within a matter of hours to help you.</p>
+        <section class="mb-4">
+            <div class="row mt-5">
+                <div class="col-md-12 mb-md-0 mb-5">
+                    <form id="contact_form">
+                        {% csrf_token %}
+                        {% if user.is_authenticated %}
+                            {% if users %}
+                            <input type="hidden" id="name" name="name" class="form-control" required value="{{users.get_fullname}}">
+                            <input type="hidden" id="email" name="email" class="form-control" required value="{{users.email}}">
+                            {% endif %}
+                        {% else %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="md-form mb-0">
+                                    <label for="name" class="">Your name</label>
+                                    <input type="text" id="name" name="name" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="md-form mb-0">
+                                    <label for="email" class="">Your email</label>
+                                    <input type="email" id="email" name="email" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        {% endif %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="md-form mb-0">
+                                    <label for="subject" class="">Subject</label>
+                                    <input type="text" id="subject" name="subject" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="md-form">
+                                    <label for="message">Your message</label>
+                                    <textarea type="text" id="message" name="message" rows="2" class="summernote form-control md-textarea" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center text-lg-start mt-3 pt-2">
+                            <button type="submit" class="btn btn-primary w-100 theme-btn mx-auto" type="submit">
+                                <span class="spinner-border spinner-border-sm" role="status" id="loader" style="display:none" aria-hidden="true"></span>
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <br><br>
+    </div>
+{% endblock %}
+{% block script %}
+<script>
+    $(document).ready(function(){
+        $('.summernote').summernote({
+            height: $(window).height() * 0.3,
+            dialogsInBody: true,
+            fontSizeUnits: ['px', 'pt'],
+            dialogsFade: true,
+            codeviewFilterRegex: 'custom-regex',
+            disableDragAndDrop: true,
+            toolbar: [
+              ['style', ['style']],
+              ['font', ['bold', 'underline', 'clear']],
+              ['color', ['color']],
+              ['para', ['ul', 'ol', 'paragraph']],
+              ['table', ['table']],
+              ['insert', ['link', 'picture', 'video']],
+              ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+    });
+
+    $('#contact_form').on('submit', function(e){
+			var form = new FormData(this);
+	        Swal.fire({
+	            title: "Are you sure",
+	            text: "You want to submit this?",
+	            icon: "info",
+	            showCancelButton: true,
+	            confirmButtonText: "Yes",
+	            allowOutsideClick: false,
+	            showLoaderOnConfirm: true,
+	            preConfirm: function (){
+	                return $.post({
+	                    url: "{% url 'contact_us' %}",
+	                    data: form,
+	                    success : function (response){
+	                        if(response.data == "success"){
+	                            Swal.fire({
+	                                title: "Good job!",
+	                                html:  response.msg,
+	                                icon: "success",
+	                                allowOutsideClick: false,
+	                            }).then((result) => {
+	                                if (result.isConfirmed){
+	                                    $('#contact_form').trigger('reset');
+	                                    window.location.href = "{% url 'contact_us' %}";
+	                                }
+	                            });
+	                        }else{
+	                        	Swal.fire({
+	                        		title: "Oops!",
+	                                html:  response.msg,
+	                                icon: "error",
+	                                allowOutsideClick: false,
+	                        	});
+	                        }
+	                    },
+	                    cache       : false,
+	                    contentType : false,
+	                    processData : false,
+	                });
+	            },
+	        });
+			e.preventDefault();
+		});
+</script>
+{% endblock %}

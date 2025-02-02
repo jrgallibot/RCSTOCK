@@ -1,0 +1,84 @@
+{% load static %}
+<div class="modal-body">
+    <div class="col-lg-12 mb-3 d-flex align-items-stretch">
+        <div class="card mb-4 rounded-3 shadow-sm" style="width: 100%;">
+            <div class="card-header py-3">
+                <h4 class="my-0 fw-normal" id="membership_type">{{mem.membership_type}}</h4>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title">${{mem.price|floatformat}} Euro<small class="text-muted fw-light">/{{mem.duration}} days</small></h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                    {{mem.services|safe}}
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-top-0 pt-0">
+                <div id="paypal-button-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% block script %}
+<script>
+    function loadAsync(url, callback) {
+        var s = document.createElement('script');
+        s.setAttribute('src', url); s.onload = callback;
+        document.head.insertBefore(s, document.head.firstElementChild);
+    }
+
+    function completeOrder(paypal_name){
+        $.post({
+            url: "{% url 'subscribe_paypal' pk user_id %}",
+            type: 'POST',
+            data: { mem_id: '{{mem.id}}' },
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            'Content-Type': 'application/json',
+            success: function(response){
+                if(response.data == 'success'){
+                    Swal.fire({
+                        title: "Information!",
+                        html:  "Congratulations "+ paypal_name + ". " +response.msg,
+                        icon: "success",
+                        allowOutsideClick: false,
+                    }).then((result) => {
+                        if (result.isConfirmed){
+                            window.location.href = "{% url 'login_user' %}";
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    // Usage -- callback is inlined here, but could be a named function
+    loadAsync('https://www.paypal.com/sdk/js?client-id=AfDDRz6voGM5YGGiWW7WKOjp1TIsNaFbQj6uXuZq9xyZCFLeX7YD9czXKB7gt1KfLI7mPNXV1dRu8nSU&currency=EUR&disable-funding=credit,card', function() {
+        paypal.Buttons({
+            style: {
+                color:  'blue',
+                shape:  'pill',
+                label:  'pay',
+                height: 40
+            },
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '{{mem.price}}'
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    completeOrder(details.payer.name.given_name);
+                });
+            }
+        }).render('#paypal-button-container');
+    });
+</script>
+{% endblock %}

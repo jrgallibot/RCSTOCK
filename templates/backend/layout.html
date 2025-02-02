@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+{% load static %}
+{% load tags %}
+<html lang="en">
+<head>
+    <title>RCStock | {{ tabs_name }}</title>
+	<link rel="shortcut icon" type="image/png" href="{% static 'img/logo-ico.ico' %}"/>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+
+	<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+
+    <link href="{% static 'backend/assets/libs/sweetalert2/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'backend/assets/libs/datatables/datatables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/select2.min.css' %}" rel="stylesheet" type="text/css" />
+	<link href="{% static 'css/select2-bootstrap-5-theme.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'backend/assets/libs/toastr/build/toastr.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'backend/assets/libs/summernote/summernote.min.css' %}" rel="stylesheet" type="text/css" />
+	<link href="{% static 'css/sidebars.css' %}" rel="stylesheet">
+	<link href="{% static 'css/style.css' %}" rel="stylesheet">
+</head>
+<body>
+<main class="d-flex flex-nowrap">
+	<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 280px; height:100vh;">
+		<a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+			{% get_rcstock_logo as logo %}
+			<img src="{{ logo.url }}" width="80%">
+		</a>
+		<hr>
+		<ul class="nav nav-pills flex-column mb-auto">
+			<li class="nav-item">
+				<a href="{% url 'dashboard' %}" class="nav-link {% if li == 'dashboard' %}active{% else %}text-white{% endif %}" aria-current="page">
+					<i class="fas fa-th-large bi pe-none me-2" width="16" height="16"></i>
+					Dashboard
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'list_of_shop' %}" class="nav-link {% if li == 'shops' %}active{% else %}text-white{% endif %}" aria-current="page">
+					<i class="fas fa-shopping-bag bi pe-none me-2" width="16" height="16"></i>
+					Shop / Store
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'list_of_shop_scrapper' %}" class="nav-link {% if li == 'shop_scrapper' %}active{% else %}text-white{% endif %}" aria-current="page">
+					<i class="fas fa-server bi pe-none me-2" width="16" height="16"></i>
+					Scraper
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'list_of_suppliers' %}" class="nav-link {% if li == 'suppliers' %}active{% else %}text-white{% endif %}">
+					<i class="fas fa-truck bi pe-none me-2" width="16" height="16"></i>
+					Supplier
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'membership_pricing' %}" class="nav-link {% if li == 'membership_pricing' %}active{% else %}text-white{% endif %}" aria-current="page">
+					<i class="fas fa-money-check bi pe-none me-2" width="16" height="16"></i>
+					Membership Pricing
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'reported_product' %}" class="nav-link {% if li == 'report_product' %}active{% else %}text-white{% endif %}" aria-current="page">
+					<i class="fas fa-chart-line bi pe-none me-2" width="16" height="16"></i>
+					Report
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'list_of_users' %}" class="nav-link {% if li == 'employee' %}active{% else %}text-white{% endif %}">
+					<i class="fas fa-user bi pe-none me-2" width="16" height="16"></i>
+					User
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'logs_history' %}" class="nav-link {% if li == 'logs_history' %}active{% else %}text-white{% endif %}">
+					<i class="fas fa-file-alt bi pe-none me-2" width="16" height="16"></i>
+					Logs
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'faq_admin' %}" class="nav-link {% if li == 'faq' %}active{% else %}text-white{% endif %}">
+					<i class="fas fa-question bi pe-none me-2" width="16" height="16"></i>
+					FAQ
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'queries' %}" class="nav-link {% if li == 'queries' %}active{% else %}text-white{% endif %}">
+					<i class="fas fa-message bi pe-none me-2" width="16" height="16"></i>
+					Queries
+				</a>
+			</li>
+			<li class="nav-item">
+				<a href="{% url 'gen_info' %}" class="nav-link {% if li == 'gen_info' %}active{% else %}text-white{% endif %}">
+					<i class="fas fa-cog bi pe-none me-2" width="16" height="16"></i>
+					Settings
+				</a>
+			</li>
+		</ul>
+		<hr>
+		<div class="dropdown">
+			<a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+				<img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+				<strong>Account</strong>
+			</a>
+			<ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+				<li>
+					<a class="dropdown-item logout" href="#">Sign out</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid h-100 overflow-auto p-5">
+		{% block content %}{% endblock %}
+	</div>
+</main>
+	<script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+	<script src="{% static 'js/sidebars.js' %}"></script>
+    <!-- Libraries -->
+    <script src="{% static 'backend/assets/libs/sweetalert2/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'js/select2.full.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/toastr/build/toastr.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/summernote/summernote.min.js' %}"></script>
+
+    <!-- Charts JS -->
+    <script src="{% static 'backend/assets/plugins/chart.js/chart.min.js' %}"></script> 
+    <script src="{% static 'backend/assets/js/index-charts.js' %}"></script> 
+	<script type="text/javascript">
+    	$('.select2').select2({
+    		width: '100%',
+    		theme: 'bootstrap-5',
+		    placeholder: 'Choose',
+		});
+
+    	{% for msg in messages %}
+            {% if 'welcome' in msg.extra_tags %}
+                $("#liveToastContainer").css('z-index', '1005');
+                new bootstrap.Toast(document.getElementById("liveToast")).show();
+            {% endif %}
+        {% endfor %}
+
+
+    	$('.logout').click(function () {
+			Swal.fire({
+				title: "Are you sure",
+				text: "You want to Sign Out?",
+				icon: "info",
+				showCancelButton: true,
+				confirmButtonText: "Yes, I will!",
+				cancelButtonText: "No, cancel!",
+				reverseButtons: true
+			}).then((result) => {
+			  if (result.value) {
+				Swal.fire({
+						title: "Information",
+						html: "You successfully logout your account !",
+						icon: "success",
+						confirmButtonColor: "#3498DB",
+						allowOutsideClick: false,
+					}).then((result) => {
+						if(result.isConfirmed){
+							window.location = '{% url "sign_out" %}';
+						}
+					});
+			  }
+			})
+		});
+    </script>
+    {% block script %}{% endblock %}
+</body>
+</html>

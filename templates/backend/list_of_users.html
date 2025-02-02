@@ -1,0 +1,381 @@
+{% extends 'backend/layout.html' %}
+{% load static %}
+{% block content %}
+	<div class="row mt-5 align-items-center justify-content-between">
+	    <div class="col-auto">
+            <h3 class="app-page-title mb-0">User</h3>
+	    </div>
+	    <div class="col-auto">
+		     <div class="page-utilities">
+			    <div class="row g-2 justify-content-start justify-content-md-end align-items-center">
+				    <div class="col-auto">
+					    <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal">
+						    <i class="fas fa-plus"></i>
+						    Register User
+						</a>
+				    </div>
+			    </div>
+		    </div>
+	    </div>
+    </div>
+	<br><br>
+	<div class="col-sm-12 row">
+		<div class="app-card app-card-orders-table shadow-sm mb-5">
+		    <div class="app-card-body">
+			    <div class="table-responsive">
+			    	<table class="table table-hover" id="user_list" width="100%">
+						<thead>
+							<tr>
+								<th class="cell">Action</th>
+								<th class="cell">Username</th>
+								<th class="cell">Full Name</th>
+								<th class="cell">Role</th>
+								<th class="cell">Email</th>
+								<th class="cell">Status</th>
+								<th class="cell">Date Created</th>
+								
+							</tr>
+						</thead>
+					</table>
+		        </div>
+		    </div>	
+		</div>
+	</div>
+
+	<div class="modal fade" id="exampleModal" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+		    <div class="modal-content">
+			    <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">REGISTER USERS</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			    </div>
+			    <form id="submitForm">
+			    	{% csrf_token %}
+				   	<div class="modal-body">
+				   		<div class="row">
+				   			<div class="mb-3 col-sm-4">
+								<label>First Name <span class="asteriskField">*</span></label>
+								<input  name="fname" type="text" class="form-control fname" placeholder="First Name" required="required" autocomplete="off">
+							</div>
+							<div class="mb-3 col-sm-4">
+								<label>Middle Name (Optional)</label>
+								<input  name="mname" type="text" class="form-control mname" placeholder="Middle Name" autocomplete="off">
+							</div>
+							<div class="mb-3 col-sm-4">
+								<label>Last Name <span class="asteriskField">*</span></label>
+								<input  name="lname" type="text" class="form-control lname" placeholder="Last Name" required="required" autocomplete="off">
+							</div>
+				   		</div>
+						<div class="mb-3">
+							<label>Email <span class="asteriskField">*</span></label>
+							<input  name="email" type="text" class="form-control email" placeholder="Email" required="required" autocomplete="off">
+						</div>
+						<div class="form-check mb-3">
+							<input class="form-check-input" type="checkbox" name="is_staff">
+							<label class="form-check-label" for="flexCheckDefault">
+								Is Staff
+							</label>
+						</div>
+			   			<div class="mb-3">
+							<label>Role <span class="asteriskField">*</span></label>
+							<select class="form-select select2" name="permission" required>
+								<option></option>
+								{% for row in permission %}
+								<option value="{{ row.id }}">{{ row.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="mb-3 col-sm-4">
+							<label>User Name <span class="asteriskField">*</span></label>
+							<input  name="uname" type="text" class="form-control uname" placeholder="User Name" required="required" autocomplete="off">
+						</div>
+						<div class="row">
+				   			<div class="mb-3 col-sm-6">
+								<label>Password <span class="asteriskField">*</span></label>
+								<input  name="password1" id="password1" type="password" class="form-control password1" placeholder="************" required="required" autocomplete="off">
+							</div>
+							<div class="mb-3 col-sm-6">
+								<label>Confirm Password <span class="asteriskField">*</span></label>
+								<input  name="password2" id="password2" type="password" class="form-control password2" placeholder="************" required="required" autocomplete="off">
+								<div id="alertPassword2"></div>
+							</div>
+				   		</div>
+				    </div>
+				    <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				        <button type="submit" class="btn btn-primary">Save changes</button>
+				    </div>
+			    </form>
+		    </div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="edit_modal" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	    <div class="modal-dialog modal-dialog-centered modal-xl">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title"><strong>VIEW USERS</strong></h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" id="close-edituser-modal" aria-label="Close"></button>
+	            </div>
+	            <div class="view_edit_modal_content"></div>
+	        </div>
+	    </div>
+	</div>
+
+	<div class="modal fade" id="assigned_roles" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+		    <div class="modal-content">
+			    <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">ASSIGNED ROLES</h5>
+			        <button type="button" class="btn-close" id="close-role" data-bs-dismiss="modal" aria-label="Close"></button>
+			    </div>
+			    <div class="view_roles_modal_content"></div>
+		    </div>
+		</div>
+	</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+	$('#password2').on('keyup', function(){
+		$('#alertPassword2').empty();
+		if($('#password1').val() == $(this).val()){
+			$('#alertPassword2').append('<small class="text-success">*Password Match.</small>');
+		}else{
+			$('#alertPassword2').append('<small class="text-danger">*Password Do Not Match.</small>');
+		}
+	});
+
+	$('#submitForm').on('submit', function(e){
+		var form = new FormData(this);
+		e.preventDefault();
+		if($('#password1').val() == $('#password2').val()){
+			$('#alertPassword2').append('');
+		}
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to add this shop?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'list_of_users' %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#submitForm').trigger('reset');
+                                    $('#user_list').DataTable().ajax.reload();
+                                    $('.btn-close').click();
+                                }
+                            });
+                        }else{
+                        	Swal.fire({
+                        		title: "Oops!",
+                                html:  response.msg,
+                                icon: "error",
+                                allowOutsideClick: false,
+                        	});
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+	});
+
+	$(document).ready(function(){
+	    $('#user_list').DataTable({
+	        'serverSide': true,
+	        'processing': true,
+	        'deferRender': true,
+	        'lengthMenu': [ 25, 50, 100 ],
+	        'order': [[ 1, 'desc' ]],
+	        'bDestroy': true,
+	        'ajax': {
+	            'url': '/api/users/?format=datatables',
+	            'type': 'GET',
+	            'beforeSend': function (request) {
+	                request.setRequestHeader("Authorization", "Token bcc89274c44530a1331e772e5579aa85d8005d44")
+	            }
+	        },
+	        'fnCreatedRow': function (row, data, index) {
+	            $(row).attr('id', data['id']);
+	        },
+	        'columns': [
+	            {'data': 'id',
+	                'render': function(data, type, row, meta) {
+	                	if(row['is_active'] == 1) {
+	                		return "<a href='javascript:void(0);' data-role='edit' data-id='"+ row['id'] + "'>View</a> |\
+	                    	<a href='javascript:void(0);' data-role='assigned-roles' data-id='"+ row['id'] + "'>Role</a> |\
+	                    	<a href='javascript:void(0);' data-role='deactivate' data-id='"+ row['id'] + "'>Deactivate</a>"
+	                	}else if (row['is_active'] == 0) {
+	                		return "<a href='javascript:void(0);' data-role='edit' data-id='"+ row['id'] + "'>View</a> |\
+	                    	<a href='javascript:void(0);' data-role='assigned-roles' data-id='"+ row['id'] + "'>Role</a> |\
+	                    	<a href='javascript:void(0);' data-role='activate' data-id='"+ row['id'] + "'>Activate</a>"
+	                	}
+	                }
+	            },
+	            {'data': 'username', 'className': 'text-start' },
+	            {'data': 'fullname',
+	                'name': 'last_name, first_name',
+	                'className': 'text-center'
+	            },
+	            {'data': 'permission',
+	            	'render': function(data, type, row, meta) {
+	            		if(row['permission'] == 'Suppliers') {
+		                    return "<span class='badge bg-primary'>"+data+"</span>"
+		                }else if(row['permission'] == 'Super Administrator') {
+		                    return "<span class='badge bg-success'>"+data+"</span>"
+		                }else{
+		                	return "<span class='badge bg-danger'>"+data+"</span>"
+		                }
+	                },
+	                'className': 'text-center',
+	                'searchable': false
+	            },
+	            {'data': 'email', 'className': 'text-start' },
+	            {'data': 'is_active',
+	                'render': function(data, type, row, meta) {
+	                    if(row['is_active'] == 1) {
+	                        return '<svg xmlns="http://www.w3.org/2000/svg" width="16" style="color:green" height="16" fill="currentColor" class="bi 					bi-check-circle" viewBox="0 0 16 16">\
+										  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>\
+										  <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>\
+									</svg> Active'
+	                    }else if (row['is_active'] == 0) {
+	                        return '<svg xmlns="http://www.w3.org/2000/svg" style="color:red" width="16" height="16" fill="currentColor" class="bi 						bi-x-circle" viewBox="0 0 16 16">\
+									  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>\
+									  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>\
+									</svg> Inactive'
+	                    }
+	                },
+	                'className': 'text-center'
+	            },
+	            {'data': 'date_joined',
+	                'className': 'text-center'
+	            },
+	        ]
+	    });
+	});
+
+	$(document).on('click', 'a[data-role=edit]', function(){
+        var id = $(this).data('id');
+        var edit_modal = new bootstrap.Modal(document.getElementById('edit_modal'), {});
+		$('.view_edit_modal_content', $('#edit_modal')).load('/rc-admin/update-users-list/' + id, function(){
+			edit_modal.show();
+		});
+    });
+
+    $(document).on('click', 'a[data-role=assigned-roles]', function(){
+        var id = $(this).data('id');
+        var assigned_roles = new bootstrap.Modal(document.getElementById('assigned_roles'), {});
+		$('.view_roles_modal_content', $('#assigned_roles')).load('/rc-admin/assigned-users-roles/' + id, function(){
+			assigned_roles.show();
+		});
+    });
+
+    $(document).on('click', 'a[data-role=deactivate]', function(){
+    	var id = ($(this).data('id'));
+    	var fullname = $('#'+id).find('td:eq(2)').text();
+    	Swal.fire({
+		  title: "Confirmation",
+          text: "Are you sure you want to deactivate this account ?",
+		  icon: "info",
+		  showCancelButton: true,
+		  confirmButtonColor: "#3498DB",
+		  confirmButtonText: "Yes",
+		  allowOutsideClick: false,
+		}).then((result) => {
+		    if (result.isConfirmed) {
+		        Swal.showLoading()
+				$.ajax({
+					url: "{% url 'deactivate_users' %}",
+					data: {
+						id: id,
+						fullname: fullname
+					},
+					type: "POST"
+				})
+				.done(function(response){
+					if(response.data == "success"){
+                        Swal.fire({
+                            title: "Good job!",
+                            html:  response.msg,
+                            icon: "success",
+                            allowOutsideClick: false,
+                        }).then((result) => {
+                            if (result.isConfirmed){
+                                $('#user_list').DataTable().ajax.reload();
+                            }
+                        });
+                    }else{
+                    	Swal.fire({
+                    		title: "Oops!",
+                            html:  response.msg,
+                            icon: "error",
+                            allowOutsideClick: false,
+                    	});
+                    }
+				});
+			}
+		});
+    });
+
+    $(document).on('click', 'a[data-role=activate]', function(){
+    	var id = ($(this).data('id'));
+    	var fullname = $('#'+id).find('td:eq(2)').text();
+    	Swal.fire({
+		  title: "Confirmation",
+          text: "Are you sure you want to activate this account ?",
+		  icon: "info",
+		  showCancelButton: true,
+		  confirmButtonColor: "#3498DB",
+		  confirmButtonText: "Yes",
+		  allowOutsideClick: false,
+		}).then((result) => {
+		    if (result.isConfirmed) {
+		        Swal.showLoading()
+				$.ajax({
+					url: "{% url 'activate_users' %}",
+					data: {
+						id: id,
+						fullname: fullname
+					},
+					type: "POST"
+				})
+				.done(function(response){
+					if(response.data == "success"){
+                        Swal.fire({
+                            title: "Good job!",
+                            html:  response.msg,
+                            icon: "success",
+                            allowOutsideClick: false,
+                        }).then((result) => {
+                            if (result.isConfirmed){
+                                $('#user_list').DataTable().ajax.reload();
+                            }
+                        });
+                    }else{
+                    	Swal.fire({
+                    		title: "Oops!",
+                            html:  response.msg,
+                            icon: "error",
+                            allowOutsideClick: false,
+                    	});
+                    }
+				});
+			}
+		});
+    });
+</script>
+{% endblock %}

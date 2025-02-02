@@ -1,0 +1,324 @@
+{% extends 'landing.html' %}
+{% load static %}
+{% load tags %}
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="bold mt-5">Market Intelligence</h2>
+        <div class="row mt-5" style="text-align: justify;">
+            <p>{{geninfo.market_intelligence|safe}}</p>
+        </div>
+        <h2 class="bold mt-5 text-center">Pricing</h2>
+        <div class="row mt-5">
+            {% for row in membership_pricing %}
+            {% get_subscribe row.id request.user.id as your_subscription %}
+            <div class="col-lg-4 mb-3 d-flex align-items-stretch">
+                <div class="card mb-4 rounded-3 shadow-sm" style="width: 100%;">
+                    <div class="card-header py-3">
+                        <h4 class="my-0 fw-normal">{{row.membership_type}}</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title pricing-card-title">${{row.price|floatformat}} Euro<small class="text-muted fw-light">/Month</small></h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            {{row.services|safe}}
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-white border-top-0 pt-0">
+                        {% if row.price == 0 %}
+                            {% if user.is_authenticated %}
+                            <a type="button" href="#" data-role="already_login" class="w-100 btn btn-lg btn-outline-primary">Sign up for free</a>
+                            {% else %}
+                                <a class="w-100 btn btn-lg btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#sign_up_free">
+                                    Sign up for free
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            {% if your_subscription %}
+                                <h5 class="bold text-center">CURRENT PLAN</h5>
+                            {% else %}
+                                {% if user.is_authenticated %}
+                                    <a href="#" data-role="subscribe_auto" data-id="{{row.id}}" class="w-100 btn btn-lg btn-primary">Subscribe</a>
+                                {% else %}
+                                    <a href="#" data-role="subs" data-id="{{row.id}}" data-filter="{{row.price}}" class="w-100 btn btn-lg btn-primary">Subscribe</a>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="subscribe" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">SUBSCRIBE</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="view_info_details">
+                    <form id="submitForm">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <input type="hidden" name="price" id="price">
+                            <input type="hidden" name="memid" id="memid">
+                            <div class="row">
+                                <div class="mb-3 col-sm-6">
+                                    <label>First Name</label>
+                                    <input  name="fname" type="text" class="form-control fname" placeholder="First Name" required="required" autocomplete="off">
+                                </div>
+                                <div class="mb-3 col-sm-6">
+                                    <label>Middle Name (Optional)</label>
+                                    <input  name="mname" type="text" class="form-control mname" placeholder="Middle Name" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="mb-3 col-sm-6">
+                                    <label>Last Name <span class="asteriskField">*</span></label>
+                                    <input  name="lname" type="text" class="form-control lname" placeholder="Last Name" required="required" autocomplete="off">
+                                </div>
+                                <div class="mb-3 col-sm-6">
+                                    <label>Email <span class="asteriskField">*</span></label>
+                                    <input  name="email" type="text" class="form-control email" placeholder="Email" required="required" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="mb-3 col-sm-12">
+                                <label>Address <span class="asteriskField">*</span></label>
+                                <input  name="address" type="text" class="form-control address" placeholder="Address" required="required" autocomplete="off">
+                            </div>
+                            <div class="mb-3 col-sm-12">
+                                <label>User Name <span class="asteriskField">*</span></label>
+                                <input  name="uname" type="text" class="form-control uname" placeholder="User Name" required="required" autocomplete="off">
+                            </div>
+                            <div class="row">
+                                <div class="mb-3 col-sm-6">
+                                    <label>Password <span class="asteriskField">*</span></label>
+                                    <input  name="password1" id="password1" type="password" class="form-control password1" placeholder="************" required="required" autocomplete="off">
+                                </div>
+                                <div class="mb-3 col-sm-6">
+                                    <label>Confirm Password <span class="asteriskField">*</span></label>
+                                    <input  name="password2" id="password2" type="password" class="form-control password2" placeholder="************" required="required" autocomplete="off">
+                                    <div id="alertPassword2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="view_paypal_details"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sign_up_free" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">SUBSCRIBE FREE</h5>
+                    <button type="button" id="close-freesignup-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="FreeSubsForms">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="mb-3 col-sm-6">
+                                <label>First Name</label>
+                                <input  name="f_fname" type="text" class="form-control fname" placeholder="First Name" required="required" autocomplete="off">
+                            </div>
+                            <div class="mb-3 col-sm-6">
+                                <label>Middle Name (Optional)</label>
+                                <input  name="f_mname" type="text" class="form-control mname" placeholder="Middle Name" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-sm-6">
+                                <label>Last Name <span class="asteriskField">*</span></label>
+                                <input  name="f_lname" type="text" class="form-control lname" placeholder="Last Name" required="required" autocomplete="off">
+                            </div>
+                            <div class="mb-3 col-sm-6">
+                                <label>Email <span class="asteriskField">*</span></label>
+                                <input  name="f_email" type="text" class="form-control email" placeholder="Email" required="required" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="mb-3 col-sm-12">
+                            <label>Address <span class="asteriskField">*</span></label>
+                            <input  name="f_address" type="text" class="form-control address" placeholder="Address" required="required" autocomplete="off">
+                        </div>
+                        <div class="mb-3 col-sm-12">
+                            <label>User Name <span class="asteriskField">*</span></label>
+                            <input  name="f_uname" type="text" class="form-control uname" placeholder="User Name" required="required" autocomplete="off">
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-sm-6">
+                                <label>Password <span class="asteriskField">*</span></label>
+                                <input  name="f_password1" id="f_password1" type="password" class="form-control password1" placeholder="************" required="required" autocomplete="off">
+                            </div>
+                            <div class="mb-3 col-sm-6">
+                                <label>Confirm Password <span class="asteriskField">*</span></label>
+                                <input  name="f_password2" id="f_password2" type="password" class="form-control password2" placeholder="************" required="required" autocomplete="off">
+                                <div id="f_alertPassword2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script type="text/javascript">
+        {% if status %}
+            Swal.fire({
+                title: "{{ title }}",
+                html:  "{{ message }}",
+                icon: "{{ status }}"
+            });
+        {% endif %}
+
+        $('.view_paypal_details').css('display', 'none');
+        $('#password2').on('keyup', function(){
+            $('#alertPassword2').empty();
+            if($('#password1').val() == $(this).val()){
+                $('#alertPassword2').append('<small class="text-success">*Password Match.</small>');
+            }else{
+                $('#alertPassword2').append('<small class="text-danger">*Password Do Not Match.</small>');
+            }
+        });
+
+        $('#f_password2').on('keyup', function(){
+            $('#f_alertPassword2').empty();
+            if($('#f_password1').val() == $(this).val()){
+                $('#f_alertPassword2').append('<small class="text-success">*Password Match.</small>');
+            }else{
+                $('#f_alertPassword2').append('<small class="text-danger">*Password Do Not Match.</small>');
+            }
+        });
+
+        $(document).on('click', 'a[data-role=subs]', function(){
+            $('#memid').val($(this).data('id'));
+            $('#price').val($(this).data('filter'));
+            var subs_modal = new bootstrap.Modal(document.getElementById('subscribe'), {});
+            subs_modal.show();
+        });
+
+        $(document).on('click', 'a[data-role=already_login]', function(){
+            Swal.fire({
+                title: "Invalid!",
+                html:  "It seems that you are already logged in. You cannot downgrade your account once you are already subscribed to a higher plan.",
+                icon: "warning"
+            });
+        })
+
+        $(document).on('click', 'a[data-role=subscribe_auto]', function(){
+            var id = $(this).data('id');
+            var subs_modal = new bootstrap.Modal(document.getElementById('subscribe'), {});
+            subs_modal.show();
+            $('.view_info_details').css('display', 'none');
+            $('.btn-close').css('display', 'none');
+            callPage('/paypal/subscribe/' + id + '/' + '{{request.user.id}}');
+            $('.view_paypal_details').css('display', '');
+        });
+
+        $('#FreeSubsForms').on('submit', function(e){
+            var form = new FormData(this);
+            Swal.fire({
+                title: "Are you sure",
+                text: "You want to save this details?",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                allowOutsideClick: false,
+                showLoaderOnConfirm: true,
+                preConfirm: function (){
+                    return $.post({
+                        url: "{% url 'subscribe_free' %}",
+                        data: form,
+                        success : function (response){
+                            if(response.data == "success"){
+	                            Swal.fire({
+	                                title: "Good job!",
+	                                html:  response.msg,
+	                                icon: "success",
+	                                allowOutsideClick: false,
+	                            }).then((result) => {
+	                                if (result.isConfirmed){
+	                                    $('#FreeSubsForms').trigger('reset');
+                                        $('#close-freesignup-modal').click();
+                                        window.location.href = "{% url 'login_user' %}"
+	                                }
+	                            });
+	                        }else{
+                                Swal.fire('Oops!', response.msg, "warning");
+                            }
+                        },
+                        cache       : false,
+                        contentType : false,
+                        processData : false,
+                    });
+                },
+            });
+            e.preventDefault();
+        });
+
+        $('#submitForm').on('submit', function(e){
+            var form = new FormData(this);
+            Swal.fire({
+                title: "Are you sure",
+                text: "You want to save this details?",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                allowOutsideClick: false,
+                showLoaderOnConfirm: true,
+                preConfirm: function (){
+                    return $.post({
+                        url: "{% url 'market_intelligence' %}",
+                        data: form,
+                        success : function (response){
+                            if(response.user_id){
+                                $('.view_info_details').css('display', 'none');
+                                $('.btn-close').css('display', 'none');
+                                callPage('/paypal/subscribe/' + $('#memid').val() + '/' + response.user_id);
+                                $('.view_paypal_details').css('display', '');
+                            }else{
+                                Swal.fire('Oops!', response.msg, "warning");
+                            }
+                        },
+                        cache       : false,
+                        contentType : false,
+                        processData : false,
+                    });
+                },
+            });
+            e.preventDefault();
+        });
+
+        function callPage(pageRefInput) {
+            $.ajax({
+                url: pageRefInput,
+                type: "GET",
+                dataType: 'text',
+                beforeSend: function() {
+                    $('.view_paypal_details').empty();
+                    $('.view_paypal_details').append(`
+                        <div class="spinner-border" id="preloader" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `);
+                },
+                success: function(response) {
+                    $('.view_paypal_details').html(response);
+                },
+                complete: function() {
+                    $('#preloader').css('display', 'none');
+                }
+            });
+        }
+    </script>
+{% endblock %}

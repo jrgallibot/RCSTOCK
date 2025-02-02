@@ -1,0 +1,59 @@
+{% extends 'backend/layout.html' %}
+{% load static %}
+{% block content %}
+    <div class="row mt-5 align-items-center justify-content-between">
+	    <div class="col-auto">
+            <h3 class="app-page-title mb-0">Logs</h3>
+	    </div>
+    </div>
+	<br><br>
+	<div class="col-sm-12 row">
+		<div class="app-card app-card-orders-table shadow-sm mb-5">
+		    <div class="app-card-body">
+			    <div class="table-responsive">
+			    	<table class="table table-hover" id="logs_list" width="100%">
+						<thead>
+							<tr>
+								<th class="cell">Description</th>
+								<th class="cell">User</th>
+								<th class="cell">Date Time</th>
+							</tr>
+						</thead>
+					</table>
+		        </div>
+		    </div>	
+		</div>
+	</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+	$(document).ready(function(){
+	    $('#logs_list').DataTable({
+	        'serverSide': true,
+	        'processing': true,
+	        'deferRender': true,
+	        'lengthMenu': [ 25, 50, 100 ],
+	        'order': [[ 2, 'desc' ]],
+	        'bDestroy': true,
+	        'ajax': {
+	            'url': '/api/logs/?format=datatables',
+	            'type': 'GET',
+	            'beforeSend': function (request) {
+	                request.setRequestHeader("Authorization", "Token bcc89274c44530a1331e772e5579aa85d8005d44")
+	            }
+	        },
+	        'fnCreatedRow': function (row, data, index) {
+	            $(row).attr('id', data['id']);
+	        },
+	        'columns': [
+	            {'data': 'descriptions', 'className': 'text-start' },
+	            {'data': 'user',
+	                'name': 'user.last_name, user.first_name',
+	                'className': 'text-center'
+	            },
+	            {'data': 'datetime_added', 'className': 'text-start' },
+	        ]
+	    });
+	});
+</script>
+{% endblock %}

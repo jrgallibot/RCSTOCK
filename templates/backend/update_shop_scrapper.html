@@ -1,0 +1,230 @@
+{% load tags %}
+<form id="submitEditForm">
+{% csrf_token %}
+<div class="modal-body">
+	<ul class="nav nav-tabs">
+		<li class="nav-item">
+			<a class="nav-link font-normal active" data-bs-toggle="tab" href="#main">Main</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link font-normal" data-bs-toggle="tab" href="#additional">Additional</a>
+		</li>
+	</ul>
+	<div class="tab-content clearfix">
+		<div class="tab-pane active" id="main">
+			<div class="card border-top-0 rounded-0">
+				<div class="card-body">
+				<input type="hidden" name="update-id" id="update-id">
+					<div class="row">
+						<div class="col-lg-12 mb-3">
+							<label>Shop <span class="asteriskField">*</span></label>
+							<select class="form-select select2" id="edit_shop_name" data-dropdown-parent="#edit_scrapper_modal" name="edit_shop_name" required>
+								<option></option>
+								{% for row in shop %}
+									{% if row.id == scrapper.shop_id %}
+										<option value="{{ row.id }}" selected>{{ row.name }}</option>
+									{% else %}
+										<option value="{{ row.id }}">{{ row.name }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Wrapper Htype</label>
+							<input  name="edit_wrapper_htype" type="text" class="form-control edit_wrapper_htype" placeholder="Wrapper Htype" value="{{scrapper.wrapper_htype}}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Wrapper Class</label>
+							<input  name="edit_wrapper_class" type="text" class="form-control edit_wrapper_class" placeholder="Wrapper Class" value="{{scrapper.wrapper_class}}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Content Htype</label>
+							<input  name="edit_content_htype" type="text" class="form-control edit_content_htype" placeholder="Content Htype" value="{{scrapper.content_htype}}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Content Class</label>
+							<input  name="edit_content_class" type="text" class="form-control edit_content_class" placeholder="Cotent Class" value="{{scrapper.content_class}}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-5 mb-3">
+							<label>Image Htype</label>
+							<input  name="edit_img_htype" type="text" class="form-control edit_img_htype" placeholder="Image Htype" value="{{scrapper.image_htype}}">
+						</div>
+						<div class="col-lg-5 mb-3">
+							<label>Image Class</label>
+							<input  name="edit_img_class" type="text" class="form-control edit_img_class" placeholder="Image Class" value="{{scrapper.image_class}}">
+						</div>
+						<div class="col-lg-2 mb-3">
+							<label>Image Source</label>
+							<input  name="edit_img_source" type="text" class="form-control edit_img_source" placeholder="Image Source" value="{{scrapper.image_source}}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Product Name Htype</label>
+							<input  name="edit_product_name_htype" type="text" class="form-control edit_product_name_htype" placeholder="Product Name Htype" value="{{ scrapper.product_name_htype }}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Product Name Class</label>
+							<input  name="edit_product_name_class" type="text" class="form-control edit_product_name_class" placeholder="Product Name Class" value="{% if scrapper.product_name_class %}{{scrapper.product_name_class}}{% endif %}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Link Htype</label>
+							<input  name="edit_link_htype" type="text" class="form-control edit_link_htype" placeholder="Link Htype" value="{{scrapper.link_htype}}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Link Class</label>
+							<input  name="edit_link_class" type="text" class="form-control edit_link_class" placeholder="Link Class" value="{% if scrapper.link_class %}{{scrapper.link_class}}{% endif %}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Price Htype</label>
+							<input  name="edit_price_htype" type="text" class="form-control edit_price_htype" placeholder="Price Htype" value="{{scrapper.price_htype}}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Price Class</label>
+							<input  name="edit_price_class" type="text" class="form-control edit_price_class" placeholder="Price Class" value="{{scrapper.price_class}}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Manufacturer Htype</label>
+							<input  name="edit_manufacturer_htype" type="text" class="form-control edit_manufacturer_htype" placeholder="Manufacturer Htype" value="{{scrapper.manufacturer_htype}}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Manufacturer Class</label>
+							<input  name="edit_manufacturer_class" type="text" class="form-control edit_manufacturer_class" placeholder="Manufacturer Class" value="{% if scrapper.manufacturer_class %}{{scrapper.manufacturer_class}}{% endif %}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 mb-3">
+							<label>Stock Status Htype</label>
+							<input  name="edit_stock_status_htype" type="text" class="form-control edit_stck_status_htype" placeholder="Stock Status Htype" value="{{scrapper.stock_status_htype}}">
+						</div>
+						<div class="col-lg-6 mb-3">
+							<label>Stock Status Class</label>
+							<input name="edit_stock_status_class" type="text" class="form-control edit_stock_status_class" placeholder="Stock Status Class" value="{{scrapper.stock_status_class}}">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="tab-pane" id="additional">
+			<div class="card border-top-0 rounded-0">
+				<div class="card-body">
+					<div class="form-group mb-3">
+						<label>Wrapper</label>
+						<input type="text" class="form-control" name="wrapper_additional" value="{% if additional_scrapper.wrapper %}{{ additional_scrapper.wrapper }}{% endif %}">
+					</div>
+					<div class="form-group mb-3">
+						<label>Product Name Htype / Class</label>
+						<input type="text" class="form-control" name="product_name_additional" value="{% if additional_scrapper.product_name %}{{ additional_scrapper.product_name }}{% endif %}">
+					</div>
+					<div class="row">
+						<div class="col-6">
+							<div class="form-group mb-3">
+								<label>Link Htype / Class</label>
+								<input type="text" class="form-control" name="link_additional" value="{% if additional_scrapper.link %}{{ additional_scrapper.link }}{% endif %}">
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="form-group mb-3">
+								<label>Link Attribute</label>
+								<input type="text" class="form-control" name="link_attribute_additional" value="{% if additional_scrapper.link_attribute %}{{ additional_scrapper.link_attribute }}{% endif %}">
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							<div class="form-group mb-3">
+								<label>Photo Htype / Class</label>
+								<input type="text" class="form-control" name="photo_additional" value="{% if additional_scrapper.photo %}{{ additional_scrapper.photo }}{% endif %}">
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="form-group mb-3">
+								<label>Photo Attribute</label>
+								<input type="text" class="form-control" name="photo_attribute_additional" value="{% if additional_scrapper.photo_attribute %}{{ additional_scrapper.photo_attribute }}{% endif %}">
+							</div>
+						</div>
+					</div>
+					<div class="form-group mb-3">
+						<label>Manufacturer</label>
+						<input type="text" class="form-control" name="manufacturer_additional" value="{% if additional_scrapper.manufacturer %}{{ additional_scrapper.manufacturer }}{% endif %}">
+					</div>
+					<div class="form-group mb-3">
+						<label>Stock Status</label>
+						<input type="text" class="form-control" name="stock_status_additional" value="{% if additional_scrapper.stock_status %}{{ additional_scrapper.stock_status }}{% endif %}">
+					</div>
+					<div class="form-group mb-3">
+						<label>SKU</label>
+						<input type="text" class="form-control" name="sku_additional" value="{% if additional_scrapper.sku %}{{ additional_scrapper.sku }}{% endif %}">
+					</div>
+					<div class="form-group mb-3">
+						<label>Price</label>
+						<input type="text" class="form-control" name="price_additional" value="{% if additional_scrapper.price %}{{ additional_scrapper.price }}{% endif %}">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn btn-default" data-bs-dismiss="modal" id="close-editscrapper-modal">Close</button>
+	<button type="submit" class="btn btn-primary">Save changes</button>
+</div>
+</form>
+<script type="text/javascript">
+	$('.select2').select2({
+		width: '100%',
+		theme: 'bootstrap-5',
+	    placeholder: 'Choose',
+	});
+
+	$('#submitEditForm').on('submit', function(e){
+        var form = new FormData(this);
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to edit the Shop Listed",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'update_shop_scrapper' pk %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#submitEditForm').trigger('reset');
+                                    $('#srapper_list').DataTable().ajax.reload();
+                                    $('#close-editscrapper-modal').click();
+                                }
+                            });
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+        e.preventDefault();
+    });
+</script>

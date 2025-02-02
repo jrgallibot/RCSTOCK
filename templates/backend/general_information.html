@@ -1,0 +1,181 @@
+{% extends 'backend/layout.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+    <div class="row mt-5 align-items-center justify-content-between">
+	    <div class="col-auto">
+            <h3 class="app-page-title mb-0">Settings</h3>
+	    </div>
+    </div>
+	<br><br>
+	<div class="col-sm-12 row">
+		<div class="app-card app-card-orders-table shadow-sm mb-5">
+		    <div class="app-card-body">
+		    	<div class="row">
+		    		<div class="col-sm-4">
+		    			<img src="{{ gen_info.picture.url }}" style="object-fit:cover;" id="profile-avatar" class="rounded-circle" width="300px" height="300px" style="color: black;">
+				        <button type="button" class="btn btn-primary btn-rounded" id="btn-update-picture" style="margin-top: 120px !important; margin-left: -40px;">
+				        	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera"viewBox="0 0 16 16">
+							  	<path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+							  	<path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+							</svg>
+				        </button>
+				        <form id="uploadPhotoForm" enctype="multipart/form-data" style="display: none;">
+				            {% csrf_token %}
+				            <div class="form-group">
+				            	{{ uploadlogo_form.picture|as_crispy_field }}
+				            </div>
+				            <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Save changes</button>
+				        </form>
+				        <br><br>
+			    	</div>
+			    	<div class="col-sm-8">
+			    		<form id="submitEditForm">
+			    			{% csrf_token %}
+			    			<input type="hidden" name="gen_id" value="{{gen_info.id}}">
+			    			<div class="mb-3">
+								<label>System Name <span class="asteriskField">*</span></label>
+								<input  name="sys_name" type="text" class="form-control sys_name" placeholder="System Name" required="required" value="{{gen_info.system_name}}">
+							</div>
+							<div class="mb-3">
+								<label>System Version<span class="asteriskField">*</span></label>
+								<input  name="system_ver" type="text" class="form-control system_ver" placeholder="System Version" required="required" value="{{gen_info.system_version}}">
+							</div>
+							<div class="mb-3">
+								<label>Email <span class="asteriskField">*</span></label>
+								<input  name="email" type="text" class="form-control email" placeholder="Email" required="required" value="{{gen_info.email}}">
+							</div>
+							<div class="mb-3">
+								<label>Address <span class="asteriskField">*</span></label>
+								<input  name="address" type="text" class="form-control address" placeholder="Address" required="required" value="{{gen_info.address}}">
+							</div>
+							<div class="row">
+								<div class="mb-3 col-sm-4">
+									<label>Mobile No.</label>
+									<input  name="mob_no" type="text" class="form-control mob_no" placeholder="0000000000" value="{{gen_info.mobile_no}}">
+								</div>
+								<div class="mb-3 col-sm-4">
+									<label>Tel No.</label>
+									<input  name="tel_no" type="text" class="form-control tel_no" placeholder="00000000" value="{{gen_info.tel_no}}">
+								</div>
+								<div class="mb-3 col-sm-4">
+									<label>Fax</label>
+									<input  name="fax" type="text" class="form-control fax" placeholder="00000000" value="{{gen_info.fax}}">
+								</div>
+							</div>
+							<div class="mb-3">
+								<label>Data Protection <span class="asteriskField">*</span></label>
+								<textarea class="form-control summernote" name="data_protection" style="height: 200px;">{{gen_info.data_protection}}</textarea>
+							</div>
+							<div class="mb-3">
+								<label>Affiliate <span class="asteriskField">*</span></label>
+								<textarea class="form-control summernote" name="affiliate" style="height: 200px;">{{gen_info.affiliate}}</textarea>
+							</div>
+							<div class="mb-3">
+								<label>Market Intelligence <span class="asteriskField">*</span></label>
+								<textarea class="form-control summernote" name="market_intelligence" style="height: 200px;">{{gen_info.market_intelligence}}</textarea>
+							</div>
+							<button type="submit" class="btn btn-primary mt-3 float-end mb-3">Save changes</button>
+			    		</form>
+			    	</div>
+		    	</div>
+		    </div>	
+		</div>
+	</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+	$(document).ready(function() {
+
+		 $('.summernote').summernote({
+	        height: $(window).height() * 0.7,
+	        dialogsInBody: true,
+	        fontSizeUnits: ['px', 'pt'],
+	        dialogsFade: true,
+	        codeviewFilterRegex: 'custom-regex',
+	        disableDragAndDrop: true,
+	        toolbar: [
+	          ['style', ['style']],
+	          ['font', ['bold', 'underline', 'clear']],
+	          ['color', ['color']],
+	          ['para', ['ul', 'ol', 'paragraph']],
+	          ['table', ['table']],
+	          ['insert', ['link', 'picture', 'video']],
+	          ['view', ['fullscreen', 'codeview', 'help']]
+	        ]
+	    });
+
+		 $('#id_picture').on('change', function(){
+            readURLPhoto(this);
+        });
+
+        function readURLPhoto(input) {
+            var url = input.value;
+            var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+            if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#profile-avatar').attr('src', e.target.result);
+                }
+                $('#uploadPhotoForm').submit();
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $('#btn-update-picture').on('click', function(){
+            $('#id_picture').trigger('click');
+        });
+
+        $('#uploadPhotoForm').on('submit', function(e){
+	        $.ajax({
+	            data        : new FormData(this),
+	            url         : '{% url "upload_logo_photo" gen_info.id %}',
+	            type        : 'POST',
+	            cache       : false,
+	            contentType : false,
+	            processData : false
+	        })
+	        .done(function(response){
+	             if(response) {
+	             	$('#header-profile').attr('src', response.picture);
+	                $("#profile-avatar").attr("src", response.picture);
+	                toastr.success(response.msg, "Success!", {timeOut: 2000});
+	            }
+	        });
+	        e.preventDefault();
+	    });
+	});
+
+ 
+
+
+     $('#submitEditForm').on('submit', function(e){
+        var form = new FormData(this);
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to edit the System Generail Information",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'gen_info' %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            toastr.success(response.msg, "Success!", {timeOut: 2000});
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+        e.preventDefault();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends 'backend/layout.html' %}
+{% load static %}
+{% block content %}
+<style type="text/css">
+	.display-none{
+		display: none;
+	}
+</style>
+    <div class="row mt-5 align-items-center justify-content-between">
+	    <div class="col-auto">
+            <h3 class="app-page-title mb-0">Queries</h3>
+	    </div>
+    </div>
+	<br><br>
+	<div class="col-sm-12 row">
+		<div class="app-card app-card-orders-table shadow-sm mb-5">
+		    <div class="app-card-body">
+			    <div class="table-responsive">
+			        <table class="table table-hover" id="queries_list" width="100%">
+						<thead>
+							<tr>
+								<th class="cell">Action</th>
+								<th class="cell">Full Name</th>
+								<th class="cell">Email</th>
+								<th class="cell">Subject</th>
+								<th class="cell">Is Seen</th>
+								<th class="cell">Is Reply</th>
+								<th class="cell">Datetime Added</th>
+							</tr>
+						</thead>
+					</table>
+		        </div>
+		    </div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="edit_modal" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	    <div class="modal-dialog modal-dialog-centered modal-xl">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title"><strong>VIEW QUERIES</strong></h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" id="close-editqueries-modal" aria-label="Close"></button>
+	            </div>
+	            <div class="view_edit_modal_content"></div>
+	        </div>
+	    </div>
+	</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+	$(document).ready(function(){
+	    $('#queries_list').DataTable({
+	        'serverSide': true,
+	        'processing': true,
+	        'deferRender': true,
+	        'lengthMenu': [ 25, 50, 100 ],
+	        'order': [[ 1, 'desc' ]],
+	        'bDestroy': true,
+	        'ajax': {
+	            'url': '/api/queries/?format=datatables',
+	            'type': 'GET',
+	            'beforeSend': function (request) {
+	                request.setRequestHeader("Authorization", "Token bcc89274c44530a1331e772e5579aa85d8005d44")
+	            }
+	        },
+	        'fnCreatedRow': function (row, data, index) {
+	            $(row).attr('id', data['id']);
+	        },
+	        'columns': [
+	            {'data': 'id',
+	                'render': function(data, type, row, meta) {
+	                    return "<a href='javascript:void(0);' data-role='view' data-id='"+ row['id'] + "'>View</a>"
+	                }
+	            },
+	            {'data': 'fullname', 'className': 'text-start' },
+	            {'data': 'email', 'className': 'text-start' },
+	            {'data': 'subject', 'className': 'text-start' },
+	            {'data': 'is_seen',
+	                'render': function(data, type, row, meta) {
+	                    if(row['is_seen'] == 1) {
+	                        return '<svg xmlns="http://www.w3.org/2000/svg" width="16" style="color:green" height="16" fill="currentColor" class="bi 					bi-check-circle" viewBox="0 0 16 16">\
+										  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>\
+										  <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>\
+									</svg>'
+	                    }else if (row['is_seen'] == 0) {
+	                        return '<svg xmlns="http://www.w3.org/2000/svg" style="color:red" width="16" height="16" fill="currentColor" class="bi 						bi-x-circle" viewBox="0 0 16 16">\
+									  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>\
+									  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>\
+									</svg>'
+	                    }
+	                },
+	                'className': 'text-center'
+	            },
+	            {'data': 'is_reply',
+	                'render': function(data, type, row, meta) {
+	                    if(row['is_reply'] == 1) {
+	                        return '<svg xmlns="http://www.w3.org/2000/svg" width="16" style="color:green" height="16" fill="currentColor" class="bi 					bi-check-circle" viewBox="0 0 16 16">\
+										  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>\
+										  <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>\
+									</svg>'
+	                    }else if (row['is_reply'] == 0) {
+	                        return '<svg xmlns="http://www.w3.org/2000/svg" style="color:red" width="16" height="16" fill="currentColor" class="bi 						bi-x-circle" viewBox="0 0 16 16">\
+									  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>\
+									  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>\
+									</svg>'
+	                    }
+	                },
+	                'className': 'text-center'
+	            },
+	            {'data': 'date_added',
+	                'className': 'text-center'
+	            },
+	        ]
+	    });
+
+	    $(document).on('click', 'a[data-role=view]', function(){
+	        var id = $(this).data('id');
+	        var edit_modal = new bootstrap.Modal(document.getElementById('edit_modal'), {});
+			$('.view_edit_modal_content', $('#edit_modal')).load('/rc-admin/view/queries/' + id, function(){
+				edit_modal.show();
+			});
+	    });
+
+
+		$('#submitForm').on('submit', function(e){
+			var form = new FormData(this);
+	        Swal.fire({
+	            title: "Are you sure",
+	            text: "You want to add this shop?",
+	            icon: "info",
+	            showCancelButton: true,
+	            confirmButtonText: "Yes",
+	            allowOutsideClick: false,
+	            showLoaderOnConfirm: true,
+	            preConfirm: function (){
+	                return $.post({
+	                    url: "{% url 'list_of_shop' %}",
+	                    data: form,
+	                    success : function (response){
+	                        if(response.data == "success"){
+	                            Swal.fire({
+	                                title: "Good job!",
+	                                html:  response.msg,
+	                                icon: "success",
+	                                allowOutsideClick: false,
+	                            }).then((result) => {
+	                                if (result.isConfirmed){
+	                                    $('#submitForm').trigger('reset');
+                                        $('#shop_list').DataTable().ajax.reload();
+                                        $('#close-shop-modal').click();
+	                                }
+	                            });
+	                        }else{
+	                        	Swal.fire({
+	                        		title: "Oops!",
+	                                html:  response.msg,
+	                                icon: "error",
+	                                allowOutsideClick: false,
+	                        	});
+	                        }
+	                    },
+	                    cache       : false,
+	                    contentType : false,
+	                    processData : false,
+	                });
+	            },
+	        });
+			e.preventDefault();
+		});
+	});
+</script>
+{% endblock %}

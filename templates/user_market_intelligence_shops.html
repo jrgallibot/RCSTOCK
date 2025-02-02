@@ -1,0 +1,105 @@
+{% load static %}
+{% load tags %}
+<div class="row">
+	<div class="table-responsive">
+		<table class="table table-hover table-bordered" id="datatable">
+			<thead>
+				<tr>
+					<th class="text-start col">Action</th>
+				    <th class="text-center col">Products</th>
+				    <th class="text-center col">Manufacturer</th>
+				    <th class="text-center col">SKU</th>
+				    <th class="text-center col">Price</th>
+			  	</tr>
+			</thead>
+			<tbody>
+				{% if datas %}
+				{% for data in datas %}
+				<tr class="text-center">
+					<td class="col">
+						{% if data.stock_status != 'Out of Stock' %}
+						<a href="#" title="Price Development" data-role="price_develop" data-title="{{ data.product_name }}" data-price="{{ data.price }}">
+							<i class='fas fa-line-chart bi pe-none me-2'></i>
+						</a>
+						{% endif %}
+					</td>
+				    <td class="col">{{ data.product_name }}</td>
+				    <td class="col">{% if data.manufacturer %}<em>{{ data.manufacturer }}</em>{% else %}<em>Not available</em>{% endif %}</td>
+				    <td class="col">
+				    	{% if data.stock_status == 'Out of Stock' %}
+				    		<span class="text-danger">Out of Stock</span>
+				    	{% else %}
+				    		<span class="text-success">{{ data.stock_status }}</span>
+				    	{% endif %}
+				    </td>
+				    <td class="col">
+				    	{{ shop.currency }} <span class="price">{{ data.price|floatformat:2 }}</span>
+				    </td>
+			  	</tr>
+			  	{% endfor %}
+			  	{% endif %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="modal fade" id="price_develop_modal">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header border-bottom-0">
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div id="div_price"></div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).on('click', 'a[data-role=price_develop]', function(e){
+        var prod = $(this).data('title')
+        $.post({
+            url: '/product/price/development/'+ $(this).data('title'),
+            data: {
+                'product_name': $(this).data('title'),
+                'product_price': $(this).data('price'),
+            },
+            success: function(response){
+                if(response.data == "success") {
+                	var price_develop_modal = new bootstrap.Modal(document.getElementById('price_develop_modal'), {});
+            		price_develop_modal.show();
+                    callPage('/price/development/'+ prod);
+                }else{
+                	var price_develop_modal = new bootstrap.Modal(document.getElementById('price_develop_modal'), {});
+            		price_develop_modal.show();
+                    callPage('/price/development/'+ prod);
+                }
+            }
+        });
+        e.preventDefault();
+    });
+
+    function callPage(pageRefInput) {
+        $.ajax({
+            url: pageRefInput,
+            type: "GET",
+            dataType: 'text',
+            beforeSend: function() {
+                $('#div_price').empty();
+                $('#div_price').append(`
+                    <div class="spinner-border" id="preloader" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                `);
+            },
+            success: function(response) {
+                $('#div_price').html(response);
+            },
+            complete: function() {
+                $('#preloader').css('display', 'none');
+            }
+        });
+    }
+
+	$(document).ready(function () {
+	    $('#datatable').DataTable();
+	});
+</script>

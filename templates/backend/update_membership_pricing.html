@@ -1,0 +1,96 @@
+{% load tags %}
+<div class="row">
+	<form id="submitEditForm">
+		{% csrf_token %}
+	   	<div class="modal-body">
+	   		<div class="mb-3">
+				<label>Membership Type <span class="asteriskField">*</span></label>
+				<input name="up_mem_type" type="text" class="form-control" placeholder="Shop Name" required="required" value="{{pricing.membership_type}}">
+			</div>
+			<div class="mb-3">
+				<label>Days Duration <span class="asteriskField">*</span></label>
+				<input name="up_duration" type="number" class="form-control" placeholder="Duration" required="required" value="{{pricing.duration}}">
+			</div>
+			<div class="mb-3">
+				<label>Price <span class="asteriskField">*</span></label>
+				<input name="up_price" type="number" class="form-control" required placeholder="0.00" value="{{pricing.price}}">
+			</div>
+			<div class="mb-3">
+				<label>Services <span class="asteriskField">*</span></label>
+				<textarea class="form-control summernote" name="up_services">{{pricing.services|safe}}</textarea>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" name="up_status" {% if pricing.is_active %}checked{% endif %}>
+				<label class="form-check-label" for="flexCheckDefault">
+					Status
+				</label>
+			</div>
+	    </div>
+	    <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-mem-modal">Close</button>
+	        <button type="submit" class="btn btn-primary">Save changes</button>
+	    </div>
+	</form>
+</div>
+{% block script %}
+<script>
+	$(document).ready(function(){
+		$('.summernote').summernote({
+	        height: $(window).height() * 0.3,
+	        dialogsInBody: true,
+	        fontSizeUnits: ['px', 'pt'],
+	        dialogsFade: true,
+	        codeviewFilterRegex: 'custom-regex',
+	        disableDragAndDrop: true,
+	        toolbar: [
+	          ['style', ['style']],
+	          ['font', ['bold', 'underline', 'clear']],
+	          ['color', ['color']],
+	          ['para', ['ul', 'ol', 'paragraph']],
+	          ['table', ['table']],
+	          ['insert', ['link', 'picture', 'video']],
+	          ['view', ['fullscreen', 'codeview', 'help']]
+	        ]
+	    });
+
+	    $('#submitEditForm').on('submit', function(e){
+	        var form = new FormData(this);
+	        Swal.fire({
+	            title: "Are you sure",
+	            text: "You want to edit the Membership Pricing?",
+	            icon: "info",
+	            showCancelButton: true,
+	            confirmButtonText: "Yes",
+	            allowOutsideClick: false,
+	            showLoaderOnConfirm: true,
+	            preConfirm: function (){
+	                return $.post({
+	                    url: "{% url 'update_membership_pricing' pk %}",
+	                    data: form,
+	                    success : function (response){
+	                        if(response.data == "success"){
+	                            Swal.fire({
+	                                title: "Good job!",
+	                                html:  response.msg,
+	                                icon: "success",
+	                                allowOutsideClick: false,
+	                            }).then((result) => {
+	                                if (result.isConfirmed){
+	                                    $('#submitEditForm').trigger('reset');
+	                                    $('#mem_list').DataTable().ajax.reload();
+	                                    $('#close-editmemb-modal').click();
+	                                }
+	                            });
+	                        }
+	                    },
+	                    cache       : false,
+	                    contentType : false,
+	                    processData : false,
+	                });
+	            },
+	        });
+	        e.preventDefault();
+	    });
+	});
+</script>
+{% endblock %}

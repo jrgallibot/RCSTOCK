@@ -1,0 +1,283 @@
+{% extends 'backend/layout.html' %}
+{% load static %}
+{% block content %}
+	<div class="row mt-5 align-items-center justify-content-between">
+	    <div class="col-auto">
+            <h3 class="app-page-title mb-0">Scraper</h3>
+	    </div>
+	    <div class="col-auto">
+		     <div class="page-utilities">
+			    <div class="row g-2 justify-content-start justify-content-md-end align-items-center">
+				    <div class="col-auto">
+					    <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#create_shop">
+						    <i class="fas fa-plus"></i>
+						    Add Scraper
+						</a>
+				    </div>
+			    </div>
+		    </div>
+	    </div>
+    </div>
+	<br><br>
+    <div class="col-sm-12 row">
+		<div class="app-card app-card-orders-table shadow-sm mb-5">
+		    <div class="app-card-body">
+			    <div class="table-responsive">
+			        <table class="table table-hover" id="srapper_list" width="100%">
+						<thead>
+							<tr>
+								<th class="cell">Action</th>
+								<th class="cell">Shop</th>
+								<th class="cell">Product Name Class</th>
+								<th class="cell">Product Name HType</th>
+								<th class="cell">Image Source</th>
+								<th class="cell display-none">manufacturer_htype</th>
+								<th class="cell display-none">content_htype</th>
+								<th class="cell display-none">stock_status_htype</th>
+								<th class="cell display-none">price_htype</th>
+								<th class="cell display-none">image_htype</th>
+								<th class="cell display-none">link_htype</th>
+								<th class="cell display-none">wrapper_htype</th>
+								<th class="cell display-none">manufacturer_class</th>
+								<th class="cell display-none">content_class</th>
+								<th class="cell display-none">stock_status_class</th>
+								<th class="cell display-none">price_class</th>
+								<th class="cell display-none">image_class</th>
+								<th class="cell display-none">link_class</th>
+								<th class="cell display-none">wrapper_class</th>
+								<th class="cell display-none">shop_id</th>
+							</tr>
+						</thead>
+					</table>
+		        </div>
+		    </div>	
+		</div>
+	</div>
+
+	<div class="modal fade" id="create_shop" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+		    <div class="modal-content">
+			    <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">REGISTER SHOP SCRAPPER</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			    </div>
+			    <form id="submitForm">
+			    	{% csrf_token %}
+				   	<div class="modal-body">
+				   		<div class="row">
+				   			<div class="col-lg-12 mb-3">
+								<label>Shop <span class="asteriskField">*</span></label>
+								<select class="form-select select2" data-dropdown-parent="#create_shop" name="shop_name" required>
+									<option></option>
+									{% for row in shop %}
+									<option value="{{ row.id }}">{{ row.name }}</option>
+									{% endfor %}
+								</select>
+							</div>
+				   		</div>
+						<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Wrapper Htype</label>
+								<input  name="wrapper_htype" type="text" class="form-control wrapper_htype">
+							</div>
+							<div class="col-lg-6 mb-3">
+								<label>Wrapper Class</label>
+								<input  name="wrapper_class" type="text" class="form-control wrapper_class">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Content Htype</label>
+								<input  name="content_htype" type="text" class="form-control content_htype">
+							</div>
+							<div class="col-lg-6 mb-3">
+								<label>Content Class</label>
+								<input  name="content_class" type="text" class="form-control content_class">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-lg-5 mb-3">
+								<label>Image Htype</label>
+								<input  name="img_htype" type="text" class="form-control img_htype">
+							</div>
+							<div class="col-lg-5 mb-3">
+								<label>Image Class</label>
+								<input  name="img_class" type="text" class="form-control img_class">
+							</div>
+							<div class="col-lg-2 mb-3">
+								<label>Image Source</label>
+								<input  name="img_source" type="text" class="form-control img_source">
+							</div>
+						</div>
+				   		<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Product Name Htype</label>
+								<input  name="product_name_htype" type="text" class="form-control product_name_htype">
+							</div>
+							<div class="col-lg-6 mb-3">
+								<label>Product Name Class</label>
+								<input  name="product_name_class" type="text" class="form-control product_name_class">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Link Htype</label>
+								<input  name="link_htype" type="text" class="form-control link_htype">
+							</div>
+							<div class="col-lg-6 mb-3">
+								<label>Link Class</label>
+								<input  name="link_class" type="text" class="form-control link_class">
+							</div>
+						</div>
+				   		<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Price Htype</label>
+								<input  name="price_htype" type="text" class="form-control price_htype">
+							</div>
+				   			<div class="col-lg-6 mb-3">
+								<label>Price Class</label>
+								<input  name="price_class" type="text" class="form-control price_class">
+							</div>
+						</div>
+				   		<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Manufacturer Htype</label>
+								<input  name="manufacturer_htype" type="text" class="form-control manufacturer_htype">
+							</div>
+							<div class="col-lg-6 mb-3">
+								<label>Manufacturer Class</label>
+								<input  name="manufacturer_class" type="text" class="form-control manufacturer_class">
+							</div>
+				   		</div>
+				   		<div class="row">
+							<div class="col-lg-6 mb-3">
+								<label>Stock Status Htype</label>
+								<input  name="stck_status_htype" type="text" class="form-control stck_status_htype">
+							</div>
+							<div class="col-lg-6 mb-3">
+								<label>Stock Status Class</label>
+								<input  name="stock_status_class" type="text" class="form-control stock_status_class">
+							</div>
+				   		</div>
+				    </div>
+				    <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-scrapper-modal">Close</button>
+				        <button type="submit" class="btn btn-primary">Save changes</button>
+				    </div>
+			    </form>
+		    </div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="edit_scrapper_modal" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	    <div class="modal-dialog modal-dialog-centered modal-lg">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title"><strong>EDIT SHOP SCRAPPER</strong></h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" id="close-editlogo-modal" aria-label="Close"></button>
+	            </div>
+	            <div class="view_edit_modal_content"></div>
+	        </div>
+	    </div>
+	</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+	$(document).on('click', 'a[data-role=edit]', function(){
+        var id = $(this).data('id');
+        var edit_scrapper_modal = new bootstrap.Modal(document.getElementById('edit_scrapper_modal'), {});
+		$('.view_edit_modal_content', $('#edit_scrapper_modal')).load('/rc-admin/shop/update/scrapper/' + id, function(){
+			edit_scrapper_modal.show();
+		});
+    });
+
+	$(document).ready(function(){
+	    $('#srapper_list').DataTable({
+	        'serverSide': true,
+	        'processing': true,
+	        'deferRender': true,
+	        'lengthMenu': [ 25, 50, 100 ],
+	        'order': [[ 1, 'desc' ]],
+	        'bDestroy': true,
+	        'ajax': {
+	            'url': '/api/shop/scrapper/?format=datatables',
+	            'type': 'GET',
+	        },
+	        'columns': [
+	            {'data': 'id',
+	                'render': function(data, type, row, meta) {
+	                    return "<a href='javascript:void(0);' data-role='edit' data-id='"+ row['shop_id'] + "'>Edit</a>"
+	                }
+	            },
+	            {'data': 'shop',
+	                'name': 'shop.name',
+	            },
+	            {'data': 'product_name_class', 'className': 'text-start' },
+	            {'data': 'product_name_htype', 'className': 'text-start' },
+	            {'data': 'image_source', 'className': 'text-start' },
+	            {'data': 'manufacturer_htype', 'className': 'text-start display-none' },
+	            {'data': 'content_htype', 'className': 'text-start display-none' },
+	            {'data': 'stock_status_htype', 'className': 'text-start display-none' },
+	            {'data': 'price_htype', 'className': 'text-start display-none' },
+	            {'data': 'image_htype', 'className': 'text-start display-none' },
+	            {'data': 'link_htype', 'className': 'text-start display-none' },
+	            {'data': 'wrapper_htype', 'className': 'text-start display-none' },
+	            {'data': 'manufacturer_class', 'className': 'text-start display-none' },
+	            {'data': 'content_class', 'className': 'text-start display-none' },
+	            {'data': 'stock_status_class', 'className': 'text-start display-none' },
+	            {'data': 'price_class', 'className': 'text-start display-none' },
+	            {'data': 'image_class', 'className': 'text-start display-none' },
+	            {'data': 'link_class', 'className': 'text-start display-none' },
+	            {'data': 'wrapper_class', 'className': 'text-start display-none' },
+	            {'data': 'shop_id', 'className': 'text-start display-none' },
+	        ]
+	    });
+
+		$('#submitForm').on('submit', function(e){
+			var form = new FormData(this);
+	        Swal.fire({
+	            title: "Are you sure",
+	            text: "You want to add this shop scrapper?",
+	            icon: "info",
+	            showCancelButton: true,
+	            confirmButtonText: "Yes",
+	            allowOutsideClick: false,
+	            showLoaderOnConfirm: true,
+	            preConfirm: function (){
+	                return $.post({
+	                    url: "{% url 'list_of_shop_scrapper' %}",
+	                    data: form,
+	                    success : function (response){
+	                        if(response.data == "success"){
+	                            Swal.fire({
+	                                title: "Good job!",
+	                                html:  response.msg,
+	                                icon: "success",
+	                                allowOutsideClick: false,
+	                            }).then((result) => {
+	                                if (result.isConfirmed){
+	                                    $('#submitForm').trigger('reset');
+                                        $('#srapper_list').DataTable().ajax.reload();
+                                        $('#close-scrapper-modal').click();
+	                                }
+	                            });
+	                        }else{
+	                        	Swal.fire({
+	                        		title: "Oops!",
+	                                html:  response.msg,
+	                                icon: "error",
+	                                allowOutsideClick: false,
+	                        	});
+	                        }
+	                    },
+	                    cache       : false,
+	                    contentType : false,
+	                    processData : false,
+	                });
+	            },
+	        });
+			e.preventDefault();
+		});
+	});
+</script>
+{% endblock %}

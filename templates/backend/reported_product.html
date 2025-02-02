@@ -1,0 +1,147 @@
+{% extends 'backend/layout.html' %}
+{% load static %}
+{% block content %}
+    <div class="row mt-5 align-items-center justify-content-between">
+	    <div class="col-auto">
+            <h3 class="app-page-title mb-0">Report</h3>
+	    </div>
+	</div>
+	<br><br>
+	<div class="col-sm-12 row">
+		<div class="app-card app-card-orders-table shadow-sm mb-5">
+		    <div class="app-card-body">
+			    <div class="table-responsive">
+			        <table class="table app-table-hover mb-0 text-left">
+						<thead>
+							<tr>
+								<th class="cell">Action</th>
+								<th class="cell">Generic</th>
+								<th class="cell">Product</th>
+								<th class="cell">User</th>
+								<th class="cell">Search Key</th>
+								<th class="cell">Status</th>
+								<th class="cell">Reported</th>
+								<th class="cell">Updated</th>
+								
+							</tr>
+						</thead>
+						<tbody>
+							<i class="text-center">NO DATA</i>
+							<!-- <tr>
+								<td class="cell">
+									<a class="btn-sm app-btn-success" href="#">Update</a>
+								</td>
+								<td class="cell">ffgallibot</td>
+								<td class="cell">Florussel F. Gallibot</td>
+								<td class="cell">jrgallibot@gmail.com</td>
+								<td class="cell">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+									  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+									  <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+									</svg>
+								</td>
+								<td class="cell">
+									Active
+								</td>
+								<td class="cell">
+									Administrator
+								</td>
+								<td class="cell">
+									September 9, 2022
+								</td>
+							</tr> -->
+						</tbody>
+					</table>
+		        </div>
+		    </div>	
+		</div>
+	</div>
+
+	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+		    <div class="modal-content">
+			    <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">Register Shop</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			    </div>
+			    <form method="POST" action="{% url 'list_of_shop' %}" enctype="multipart/form-data">
+			    	{% csrf_token %}
+				   	<div class="modal-body">
+				   		<div class="mb-3">
+							<label>Shop Name <span class="asteriskField">*</span></label>
+							<input  name="shop_name" type="text" class="form-control shop_name" placeholder="Shop Name" required="required">
+						</div>
+						<div class="mb-3">
+							<label>Logo <span class="asteriskField">*</span></label>
+							<input  name="shop_logo" type="file" class="form-control shop_logo" required="required">
+						</div>
+						<div class="mb-3">
+							<label>Location <span class="asteriskField">*</span></label>
+							<input  name="location" type="text" class="form-control location" placeholder="Location" required="required">
+						</div>
+						<div class="mb-3">
+							<label>Language <span class="asteriskField">*</span></label>
+							<input  name="language" type="text" class="form-control language" placeholder="Language" required="required">
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" name="status" id="flexCheckDefault">
+							<label class="form-check-label" for="flexCheckDefault">
+							    Status
+							</label>
+						</div>
+				    </div>
+				    <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				        <button type="submit" class="btn btn-primary">Save changes</button>
+				    </div>
+			    </form>
+		    </div>
+		</div>
+	</div>
+<script type="text/javascript">
+	$('#submitForm').on('submit', function(e){
+		var form = new FormData(this);
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to add this shop?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'list_of_shop' %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#submitForm').trigger('reset');
+                                    window.location.reload()
+                                }
+                            });
+                        }else{
+                        	Swal.fire({
+                        		title: "Oops!",
+                                html:  response.msg,
+                                icon: "error",
+                                allowOutsideClick: false,
+                        	});
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+		e.preventDefault();
+	});
+</script>
+{% endblock %}

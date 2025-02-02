@@ -1,0 +1,19 @@
+{% load static %}
+<div class="modal-body">
+    <div class="col-lg-12 mb-0 d-flex align-items-stretch">
+        <div class="card mb-0 rounded-3 shadow-sm" style="width: 100%;">
+            <div class="card-header py-3">
+                <h4 class="my-0 fw-normal" id="membership_type">{{ mem.membership_type }}</h4>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title">${{ mem.price|floatformat }}<small class="text-muted fw-light">/{{ mem.duration }} days</small></h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                    {{ mem.services|safe }}
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-top-0 pt-0 text-center">
+                {{ form.render }}
+            </div>
+        </div>
+    </div>
+</div>

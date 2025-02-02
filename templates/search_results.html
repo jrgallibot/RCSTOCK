@@ -1,0 +1,154 @@
+{% load static %}
+{% load tags %}
+<div class="row">
+    <input type="hidden" id="shop-pk" value="{{ pk }}">
+    {% if datas %}
+    <p class="float-end">Search results for <strong>'{{ search_input }}'</strong></p>
+    {% for data in datas %}
+        <div class="col-lg-4 mb-3 d-flex align-items-stretch" id="product-content-{{ forloop.counter }}">
+            <div class="card" style="width: 100%;">
+                <a href="javascript:void(0);" data-role="product-click" data-status="{{ data.stock_status }}" data-title="{{ data.product_name }}" data-filter="{{ data.link }}" data-photo="{{ data.photo }}" data-price="{{ data.price }}">
+                    {% if data.photo %}
+                        <center>
+                            <img src="{{ data.photo }}" style="object-fit:cover; width: 150px; height: 150px;" class="card-img-top">
+                        </center>
+                    {% else %}
+                        <div class="card-header text-center">
+                            Image not available
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="card-body pb-0">
+                    <a href="{{ data.link }}" style="text-decoration:none; color: #263238;" target="_blank" class="card-title"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="{{ data.product_name }}"
+                    >
+                        <strong>{{ data.product_name }}</strong>
+                    </a>
+
+                        <br>
+                        <small>Manufacturer: {% if data.manufacturer %}<em>{{ data.manufacturer }}</em>{% else %}<em>Not available</em>{% endif %}</small>
+                </div>
+                <div class="card-footer bg-white border-top-0 pb-0">
+                    <h6 style="bottom: 10px;">
+                        {% if data.stock_status == 'Out of Stock' %}
+                            <span class="text-danger availability" data-id="{{ forloop.counter }}" data-filter="Out of Stock" data-title="{{ pk }}">Out of Stock</span>
+                        {% else %}
+                            {% if not data.stock_status %}
+                                <span class="text-danger availability" data-id="{{ forloop.counter }}" data-filter="Out of Stock" data-title="{{ pk }}">Out of Stock</span>
+                            {% else %}
+                                <span class="text-success availability" data-id="{{ forloop.counter }}" data-filter="In Stock" data-title="{{ pk }}">{{ data.stock_status }}</span>
+                            {% endif %}
+                        {% endif %}
+                    </span></h6>
+                </div>
+                <div class="card-footer bg-white border-top-0 pt-0">
+                    <div class="d-flex justify-content-between">
+                        <div class="float-start">
+                            {% if data.stock_status != 'Out of Stock' %}
+                                <a href="javascript:void(0);" data-role="product-click" data-status="{{ data.stock_status }}" data-title="{{ data.product_name }}" data-filter="{{ data.link }}" data-photo="{{ data.photo }}" data-price="{{ data.price }}" data-id="{{ pk }}" class="btn btn-primary" style="margin-top: 10px;">
+                                    <strong>Shop Now</strong>
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="float-end">
+                            <p class="card-text">
+                                {% if data.price != 0 %}
+                                <h4>
+                                    <strong>{{ shop.currency }} <span class="price" data-id="{{ forloop.counter }}" data-filter="{{ data.price }}" data-title="{{ pk }}" data-bs-toggle="popover" data-bs-placement="top">{{ data.price|floatformat:2 }}</span></strong>
+                                </h4>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% else %}
+        <p>
+            Sorry. We have not found any results matching the search keyword <strong>'{{ search_input }}'</strong> in
+            <strong>{{ shop.name }}</strong>.
+        </p>
+    {% endif %}
+</div>
+{% block script %}
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+    
+    $('.currency-text').text('{{ shop.currency }}');
+    $('#minimum-price').val({% if min_price %}{{ min_price }}{% else %}0{% endif %});
+    $('#max-price').val({% if max_price %}{{ max_price }}{% else %}0{% endif %});
+
+    $(function() {
+        $(".price-range").slider({
+            range: true,
+            min: {% if min_price %}{{ min_price }}{% else %}0{% endif %},
+            max: {% if max_price %}{{ max_price }} + 0.01{% else %}0{% endif %},
+            values: [{% if min_price %}{{ min_price }}{% else %}0{% endif %},
+                    {% if max_price %}{{ max_price }}{% else %}0{% endif %}],
+            slide: function(event, ui) {
+                $('#minimum-price').val(ui.values[0]);
+                $('#max-price').val(ui.values[1]);
+            },
+        });
+    });
+
+    $('.price-range').on('slidestop', function(event, ui){
+        count = 0;
+        $('.price').each(function(){
+            if (!between(parseFloat($(this).data('filter')), parseFloat(ui.values[0]), parseFloat(ui.values[1]))) {
+                $('#product-content-' + $(this).data('id')).addClass('display-none');
+            } else {
+                $('#product-content-' + $(this).data('id')).removeClass('display-none');
+                count += 1;
+            }
+        });
+        $('#search-results-text-{{ pk }}').text("(" + count + ")");
+    });
+
+    function between(x, min, max) {
+        return x >= min && x <= max;
+    }
+
+    if($('#availability').is(":checked")) {
+        $('#all-stock').prop('checked', false);
+        count = 0;
+        $('.availability').each(function(){
+            if ($(this).data('filter') == 'Out of Stock') {
+                $('#product-content-' + $(this).data('id')).addClass('display-none');
+            } else {
+                $('#product-content-' + $(this).data('id')).removeClass('display-none');
+                count += 1;
+            }
+        });
+        $('#search-results-text-{{ pk }}').text("("+ count +")");
+    }
+    else {
+        $('#availability').prop('checked', false);
+        $('#all-stock').prop('checked', true);
+
+        $('#search-results-text-{{ pk }}').text("({{ total_results }})");
+    }
+
+    $(document).on('click', 'a[data-role=product-click]', function(){
+        var link = $(this).data('filter')
+        $.post({
+            url: '{% url "product_click" pk %}',
+            data: {
+                'product_name': $(this).data('title'),
+                'product_link': $(this).data('filter'),
+                'product_img': $(this).data('photo'),
+                'product_price': $(this).data('price'),
+                'product_status': $(this).data('status'),
+            },
+            success: function(response){
+                if(response.data == "success") {
+                    window.open(link, '_blank');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'landing.html' %}
+{% load tags %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card collapse d-md-block" id="filters">
+                <div class="card-header bg-white">
+                    <strong><i class="fas fa-th-large bi pe-none me-2" width="16" height="16"></i> Market Intelligence</strong>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action" id="dashboard"> <i class="fa fa-home bi pe-none me-2" width="16" height="16"></i> Dashboard</a>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action" id="account"> <i class="fas fa-user bi pe-none me-2" width="16" height="16"></i> Account</a>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action" id="settings"> <i class="fas fa-cogs bi pe-none me-2" width="16" height="16"></i> Settings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div id="div-content"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{% static 'backend/assets/plugins/chart.js/chart.min.js' %}"></script> 
+<script src="{% static 'backend/assets/js/index-charts.js' %}"></script>
+<script type="text/javascript">
+		$('#dashboard').addClass('active');
+        callPage('{% url "user_market_intelligence_dashboard" %}');
+
+		$('#dashboard').on('click', function(){
+            $('.list-group-item').each(function(){
+                $(this).removeClass('active');
+            });
+            $('#dashboard').addClass('active');
+            callPage('{% url "user_market_intelligence_dashboard" %}');
+        });
+
+        $('#account').on('click', function(){
+            $('.list-group-item').each(function(){
+                $(this).removeClass('active');
+            });
+            $('#account').addClass('active');
+            callPage('{% url "user_account" %}');
+        });
+
+        $('#settings').on('click', function(){
+            $('.list-group-item').each(function(){
+                $(this).removeClass('active');
+            });
+            $('#settings').addClass('active');
+            callPage('{% url "user_changepassword" %}');
+        });
+		function callPage(pageRefInput) {
+            $.ajax({
+                url: pageRefInput,
+                type: "GET",
+                dataType: 'text',
+                beforeSend: function() {
+                    $('#div-content').empty();
+                    $('#div-content').append(`
+                        <div class="spinner-border" id="preloader" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `);
+                },
+                success: function(response) {
+                    $('#div-content').html(response);
+                },
+                complete: function() {
+                    $('#preloader').css('display', 'none');
+                }
+            });
+        }
+</script>
+{% endblock %}

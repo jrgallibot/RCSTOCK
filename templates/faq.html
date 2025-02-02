@@ -1,0 +1,35 @@
+{% extends 'landing.html' %}
+{% block content %}
+<div class="container mt-5">
+	<h2 class="bold mt-5">Frequently Ask Question</h2>
+	<div class="row mt-5" style="text-align: justify;">
+		<div class="accordion w-100" id="basicAccordion">
+			{% if faq %}
+			{% for row in faq %}
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="headingOne">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+						data-bs-target="#bs-{{ row.id }}" aria-expanded="false" aria-controls="collapseOne">
+						{{row.question}}
+					</button>
+				</h2>
+				<div id="bs-{{ row.id }}" class="accordion-collapse collapse" aria-labelledby="headingOne"
+					data-bs-parent="#basicAccordion" style="">
+					<div class="accordion-body">
+						<ul>
+							<li>Answer: <b>{{row.answer}}</b></li>
+							{% if row.link %}
+							<li>Link Provided: <b><a href="{{row.link}}" target="_blank">{{row.link}}</a></b></li>
+							{% endif %}
+						</ul>
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			<h2 class="text-center">No data found.</h2>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}

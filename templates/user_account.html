@@ -1,0 +1,173 @@
+{% load static %}
+{% load tags %}
+<div class="row align-items-center justify-content-between">
+    <div class="col-auto">
+        <h3 class="app-page-title mb-0">Account Information</h3>
+    </div>
+</div>
+<br>
+<div class="col-sm-12 row">
+	<div class="app-card app-card-orders-table shadow-sm mb-3">
+	    <div class="app-card-body">
+            <h4 class="bold">Details</h4>
+            <form id="updateForm">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="form-group col-lg-4">
+                        <label>First Name <span class="asteriskField">*</span></label>
+                        <input type="text" class="form-control tt-none" name="fname" required value="{{users.first_name}}">
+                    </div>
+                    <div class="form-group col-lg-4">
+                        <label>Middle Name</label>
+                        <input type="text" class="form-control tt-none" name="mname" value="{% if users.middle_name %}{{users.middle_name}}{% endif %}">
+                    </div>
+                    <div class="form-group col-lg-4">
+                        <label>Last Name <span class="asteriskField">*</span></label>
+                        <input type="text" class="form-control tt-none" name="lname" required value="{{users.last_name}}">
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="form-group col-lg-4">
+                        <label>Username <span class="asteriskField">*</span></label>
+                        <input type="text" class="form-control tt-none" name="username" required value="{{users.username}}">
+                    </div>
+                    <div class="form-group col-lg-4">
+                        <label>Email <span class="asteriskField">*</span></label>
+                        <input type="text" class="form-control tt-none" name="email" required value="{{users.email}}">
+                    </div>
+                    <div class="form-group col-lg-4">
+                        <label>Address <span class="asteriskField">*</span></label>
+                        <input type="text" class="form-control tt-none" name="address" value="{% if users.address %}{{users.address}}{% endif %}">
+                    </div>
+                </div>
+                <div class="row mb-3 mt-3">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary float-end">Save changes</button>
+                    </div>
+                </div>
+            </form>
+	    </div>
+	</div>
+    {% get_valid_until subscription.membership.id request.user.id as subscribe %}
+    {% get_date_duration_days subscription.membership.id request.user.id as days_remain %}
+    {% check_permission request.user.id as permission %}
+    {% if permission %}
+    <div class="row mt-5">
+        <div class="col-sm-12">
+            <h4 class="bold">Subscription Summary</h4>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#manage" class="btn btn-primary float-end" type="button">Manage Subscription</a>
+            <br><br>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    {% if subscription %}
+                    <thead>
+                        <tr>
+                            <th rowspan="2"><h5 class="bold text-center mb-5">Overview</h5></th>
+                            <th><h5 class="bold text-center">{{subscription.membership.membership_type|upper}}</h5></th>
+                            <th><h5 class="bold text-center">{% if subscription.status == 1 %}Active{% else %}Inactive{% endif %}</h5></th>
+                            <th><h5 class="bold text-center">Valid Until</h5></th>
+                        </tr>
+                        <tr>
+                            <td><p class="text-center">Current Plan</p></td>
+                            <td><p class="text-center">Subscription Status</p></td>
+                            <td>
+                                <ul>
+                                    <li class="text-center">{{subscribe}}</li>
+                                    <li class="text-center">{{days_remain}}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </thead>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="modal fade" id="manage" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">MANAGE SUBSCRIPTION</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="view_info_details">
+                    <div class="modal-body">
+                        <h5 class="text-center">Your Current Plan: <b>{{subscription.membership.membership_type|upper}}</b></h5>
+                        <p class="text-center">You pay <b>${{subscription.membership.price}}</b> per <b>{% convert_days_to_month subscription.membership.duration %}</b> through PayPal. This subscription will renew on <b>{{subscribe}}</b></p>
+                        <div class="row mt-5">
+                        {% for row in membership_pricing %}
+                            {% get_subscribe row.id request.user.id as your_subscription %}
+                            {% if row.price != 0 %}
+                            <div class="col-lg-6 mb-3 d-flex align-items-stretch">
+                                <div class="card mb-4 rounded-3 shadow-sm" style="width: 100%;">
+                                    <div class="card-header py-3">
+                                        <h4 class="my-0 fw-normal">{{row.membership_type}}</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <h1 class="card-title pricing-card-title">${{row.price|floatformat}} Euro<small class="text-muted fw-light">/{% convert_days_to_month subscription.membership.duration %}</small></h1>
+                                        <ul class="list-unstyled mt-3 mb-4">
+                                            {{row.services|safe}}
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer bg-white border-top-0 pt-0">
+                                        {% if your_subscription %}
+                                            <h5 class="bold text-center">CURRENT PLAN</h5>
+                                        {% else %}
+                                            <a href="#" data-role="subscribe_auto" data-id="{{row.id}}" class="w-100 btn btn-lg btn-primary">Subscribe</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#updateForm').on('submit', function(e){
+        var form = new FormData(this);
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to update your information?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'user_account' %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                console.log('success')
+                            });
+                        }else{
+                            Swal.fire({
+                                title: "Oops!",
+                                html:  response.msg,
+                                icon: "error",
+                                allowOutsideClick: false,
+                            });
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+        e.preventDefault();
+    });
+</script>

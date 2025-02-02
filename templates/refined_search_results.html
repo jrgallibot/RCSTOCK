@@ -1,0 +1,66 @@
+<div class="row">
+    {% if datas %}
+    {% for data in datas %}
+        <div class="col-lg-4 mb-3 d-flex align-items-stretch">
+            <div class="card" style="width: 100%;">
+                <a href="{{ data.link }}" target="_blank">
+                    {% if data.photo %}
+                        <center>
+                            <img src="{{ data.photo }}" style="object-fit:cover; width: 150px; height: 150px;" class="card-img-top">
+                        </center>
+                    {% else %}
+                        <div class="card-header text-center">
+                            Image not available
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="card-body pb-0">
+                    <a href="{{ data.link }}" style="text-decoration:none; color: #263238;" target="_blank" class="card-title"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="{{ data.product_name }}"
+                    >
+                        <strong>{{ data.product_name }}</strong>
+                    </a>
+
+                        <br>
+                        <small>Manufacturer: {% if data.manufacturer %}<em>{{ data.manufacturer }}</em>{% else %}<em>Not available</em>{% endif %}</small>
+                </div>
+                <div class="card-footer bg-white border-top-0 pb-0">
+                    <h6 style="bottom: 10px;">
+                        {% if data.stock_status == 'Out of Stock' %}
+                            <span class="text-danger">Out of Stock</span>
+                        {% else %}
+                            {% if not data.stock_status %}
+                                <span class="text-danger">Out of Stock</span>
+                            {% else %}
+                                <span class="text-success">{{ data.stock_status }}</span>
+                            {% endif %}
+                        {% endif %}
+                    </span></h6>
+                </div>
+                <div class="card-footer bg-white border-top-0 pt-0">
+                    <div class="d-flex justify-content-between">
+                        <div class="float-start">
+                            {% if data.stock_status != 'Out of Stock' %}
+                                <a href="{{ data.link }}" class="btn btn-primary" style="margin-top: 10px;">
+                                    <strong>Shop Now</strong>
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="float-end">
+                            <p class="card-text">
+                                {% if data.price != 0 %}
+                                <h4>
+                                    <strong>{{ shop.currency }} {{ data.price|floatformat:2 }}</strong>
+                                </h4>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% else %}
+    <p>No product available.</p>
+    {% endif %}
+</div>

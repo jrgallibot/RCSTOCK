@@ -1,0 +1,177 @@
+{% load crispy_forms_tags %}
+{% load tags %}
+<div class="row">
+    <div class="col-sm-4 mt-5">
+        &emsp;&emsp;<img src="{{ shop.logo.url }}" style="object-fit:cover;" id="profile-avatar" class="rounded-circle" width="300px" height="300px">
+        <button type="button" class="btn btn-primary btn-rounded" id="btn-update-picture" style="margin-top: 130px !important; margin-left: -40px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera"viewBox="0 0 16 16">
+                <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+                <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+            </svg>
+        </button>
+        <form id="uploadPhotoForm" enctype="multipart/form-data" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ uploadshoplogo_form.logo|as_crispy_field }}
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Save changes</button>
+        </form>
+        <br><br>
+    </div>
+    <div class="col-sm-8">
+        <form id="submitEditForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <input type="hidden" name="update-id" id="update-id" value="{{shop.id}}">
+                <div class="mb-3">
+                    <label>Shop Name <span class="asteriskField">*</span></label>
+                    <input  name="edit_shop_name" type="text" class="form-control edit_shop_name" placeholder="Shop Name" required="required"
+                    value="{{shop.name}}">
+                </div>
+                <div class="mb-3">
+                    <label>Search Engine<span class="asteriskField">*</span></label>
+                    <input  name="edit_search_engine" type="text" class="form-control edit_search_engine" placeholder="Search Engine" required="required" value="{{shop.search_engine}}">
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-3">
+                        <label>Currency <span class="asteriskField">*</span></label>
+                        <input name="edit_currency" type="text" class="form-control language" required="required" value="{{shop.currency}}">
+                    </div>
+                    <div class="col-lg-6 mb-3">
+                        <label>Language <span class="asteriskField">*</span></label>
+                        <input  name="edit_language" type="text" class="form-control edit_language" placeholder="Language" required="required" value="{{shop.language}}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-3">
+                        <label>Location <span class="asteriskField">*</span></label>
+                        <input name="edit_location" type="text" class="form-control location" required="required" value="{{shop.location}}">
+                    </div>
+                    <div class="col-lg-6 mb-3">
+                        <label>Continent <span class="asteriskField">*</span></label>
+                        <input name="edit_continent" type="text" class="form-control location" required="required" value="{{shop.continent}}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>URL <span class="asteriskField">*</span></label>
+                    <input name="edit_url" type="text" class="form-control language" required="required" value="{{shop.url}}">
+                </div>
+                <div class="mb-3">
+                    <label>Search Engine Type <span class="asteriskField">*</span></label>
+                    <select class="form-control select2" data-dropdown-parent="#edit_modal" name="edit_se_type">
+                        <option></option>
+                        <option value="0" {% if shop.se_type == 0 %}selected{% endif %}>based on shop search engine</option>
+                        <option value="1" {% if shop.se_type == 1 %}selected{% endif %}>based on keyword</option>
+                    </select>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input edit_is_default" type="checkbox" name="edit_is_default" id="flexCheckDefault" {% if shop.is_default %}checked{% endif %}>
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Is Default
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input edit_status" type="checkbox" name="edit_status" id="flexCheckDefault" {% if shop.status %}checked{% endif %}>
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Status
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal" id="close-editshop-modal">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% block script %}
+<script>
+    $('.select2').select2({
+		width: '100%',
+		theme: 'bootstrap-5',
+	    placeholder: 'Choose',
+	});
+
+    $('#submitEditForm').on('submit', function(e){
+        var form = new FormData(this);
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to edit the Shop Listed",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'update_shop' pk %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#submitEditForm').trigger('reset');
+                                    $('#shop_list').DataTable().ajax.reload();
+                                    $('#close-editshop-modal').click();
+                                }
+                            });
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+        e.preventDefault();
+    });
+
+    $(document).ready(function() {
+         $('#id_logo').on('change', function(){
+            readURLPhoto(this);
+        });
+
+        function readURLPhoto(input) {
+            var url = input.value;
+            var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+            if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#profile-avatar').attr('src', e.target.result);
+                }
+                $('#uploadPhotoForm').submit();
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $('#btn-update-picture').on('click', function(){
+            $('#id_logo').trigger('click');
+        });
+
+        $('#uploadPhotoForm').on('submit', function(e){
+            $.ajax({
+                data        : new FormData(this),
+                url         : '{% url "upload_shoplogo" pk %}',
+                type        : 'POST',
+                cache       : false,
+                contentType : false,
+                processData : false
+            })
+            .done(function(response){
+                 if(response) {
+                    $('#header-profile').attr('src', response.logo);
+                    $("#profile-avatar").attr("src", response.logo);
+                    toastr.success(response.msg, "Success!", {timeOut: 2000});
+                }
+            });
+            e.preventDefault();
+        });
+    });
+</script>
+{% endblock %}

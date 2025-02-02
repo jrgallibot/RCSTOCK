@@ -1,0 +1,154 @@
+{% load tags %}
+<div class="row">
+    <form id="submitEditForm">
+        {% csrf_token %}
+        <div class="modal-body">
+            <input type="hidden" name="update-id" value="{{users.id}}">
+            <div class="row">
+                <div class="mb-3 col-sm-6">
+                    <label>First Name <span class="asteriskField">*</span></label>
+                    <input  name="up_fname" type="text" class="form-control fname" placeholder="First Name" required="required" autocomplete="off" value="{{users.first_name}}">
+                </div>
+                <div class="mb-3 col-sm-6">
+                    <label>Middle Name (Optional)</label>
+                    <input  name="up_mname" type="text" class="form-control mname" placeholder="Middle Name" autocomplete="off" value="{% if users.middle_name %}{{users.middle_name}}{% endif %}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-3 col-sm-6">
+                    <label>Last Name <span class="asteriskField">*</span></label>
+                    <input  name="up_lname" type="text" class="form-control lname" placeholder="Last Name" required="required" autocomplete="off" value="{{users.last_name}}">
+                </div>
+                <div class="mb-3 col-sm-6">
+                    <label>User Name <span class="asteriskField">*</span></label>
+                    <input  name="uname" type="text" class="form-control uname" placeholder="User Name" required="required" autocomplete="off" value="{{users.username}}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Email <span class="asteriskField">*</span></label>
+                <input  name="up_email" type="text" class="form-control email" placeholder="Email" required="required" autocomplete="off" value="{{users.email}}">
+            </div>
+            {% check_permission pk as permission %}
+            {% if permission %}
+            {% get_valid_until subscription.membership.id pk as subscribe %}
+            {% get_date_duration_days subscription.membership.id pk as days_remain %}
+            <h5 class="bold">Subscription Summary</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th rowspan="2"><h5 class="bold text-center mb-5">Overview</h5></th>
+                            <th><h5 class="bold text-center">{{subscription.membership.membership_type|upper}}</h5></th>
+                            <th><h5 class="bold text-center">{% if subscription.status == 1 %}Active{% else %}Inactive{% endif %}</h5></th>
+                            <th><h5 class="bold text-center">Valid Until</h5></th>
+                        </tr>
+                        <tr>
+                            <td><p class="text-center">Current Plan</p></td>
+                            <td><p class="text-center">Subscription Status</p></td>
+                            <td>
+                                <ul>
+                                    <li class="text-center">{{subscribe}}</li>
+                                    <li class="text-center">{{days_remain}}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            {% endif %}
+            
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <a href='javascript:void(0);' data-role='reset_password' data-id="{{users.id}}" class="btn btn-success">Reset Password</a>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+    </form>
+</div>
+{% block script %}
+<script>
+    $(document).on('click', 'a[data-role=reset_password]', function(){
+        var user_id = $(this).data('id');
+        Swal.fire({
+            title: "Confirmation",
+            text: "Are you sure you want to reset password ?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "/rc-admin/reset_password/" + user_id,
+                    type: 'POST',
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#user_list').DataTable().ajax.reload();
+                                    $('#close-edituser-modal').click();
+                                }
+                            });
+                        }else{
+                            Swal.fire({
+                                title: "Oops!",
+                                html:  response.msg,
+                                icon: "error",
+                                allowOutsideClick: false,
+                            });
+                        }   
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+        e.preventDefault();
+    });
+
+    $('#submitEditForm').on('submit', function(e){
+        var form = new FormData(this);
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to edit the Shop Listed",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'view_users' pk %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#submitEditForm').trigger('reset');
+                                    $('#user_list').DataTable().ajax.reload();
+                                    $('#close-edituser-modal').click();
+                                }
+                            });
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+        e.preventDefault();
+    });
+</script>
+{% endblock %}

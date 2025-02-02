@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+{% load static %}
+{% load tags %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to RCStock | The only tool you need</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/logo-ico.ico' %}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'backend/assets/libs/sweetalert2/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'backend/assets/libs/datatables/datatables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/select2.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/select2-bootstrap-5-theme.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'backend/assets/libs/toastr/build/toastr.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'backend/assets/libs/summernote/summernote.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/jquery-ui.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/ribbon.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+</head>
+    <nav class="navbar navbar-expand-lg bg-dark-blue">
+        <div class="container">
+            <ul class="nav mx-auto col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li>
+                    <a href="{% url 'landing' %}" class="nav-link px-2 text-white">Home</a>
+                </li>
+                <li>
+                    <a href="{% url 'about' %}" class="nav-link px-2 text-white">About Us</a>
+                </li>
+                <li>
+                    <a href="{% url 'affiliate' %}" class="nav-link px-2 text-white">Shop Support</a>
+                </li>
+                <li>
+                    <a href="{% url 'market_intelligence' %}" class="nav-link px-2 text-white">Market Intelligence</a>
+                </li>
+                <li>
+                    <a href="{% url 'faq' %}" class="nav-link px-2 text-white">FAQ</a>
+                </li>
+                <li>
+                    <a href="{% url 'contact_us' %}" class="nav-link px-2 text-white">Contact Us</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <header class="pt-4 pb-4 border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+                    <img src="{% static 'img/logo-colored.png' %}" width="200px;" class="img-logo">&emsp;
+                </a>
+                {% if title == 'landing' %}
+                <ul class="nav mx-auto col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                    <form method="get" id="searchForm" role="search">
+                        <input type="hidden" value="0" name="beta_search">
+                        <input type="search" class="form-control form-control-lg longer-search" name="search_input" id="search_input" value="{{ request.GET.search_input }}" placeholder="Search for products" autocomplete="off">
+                    </form>
+                </ul>
+                {% endif %}
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    {% if user.is_authenticated %}
+                    <li>
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle float-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                                {{ request.user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                                <li>
+                                    <a class="dropdown-item text-white" href="{% url 'user_dashboard' %}">Dashboard</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item logout text-white" href="#">Sign out</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{% url 'login_user' %}" class="nav-link px-2 link-dark">Sign In</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </header>
+    {% if request.GET.search_input %}
+    <div class="container" id="search-results">
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="d-grid gap-2">
+                    <button type="button" data-bs-toggle="collapse" href="#filters" class="d-block d-md-none btn btn-primary mb-3">Filters &dtrif;</button>
+                </div>
+                <div class="card collapse d-md-block" id="filters">
+                    <div class="card-header bg-white">
+                        <strong>Shops</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            {% for shop in shops %}
+                                <a href="javascript:void(0);" class="list-group-item list-group-item-action" data-role="shop-search-content" id="shop-{{ shop.id }}" data-id="{{ shop.id }}" data-continent="{{ shop.continent }}" data-country="{{ shop.location }}"> {{ shop.name }} <span class="float-end" id="search-results-text-{{ shop.id }}"></span></a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card-header bg-white border-top">
+                        <strong>Countries</strong>
+                    </div>
+                    <div class="card-body">
+                        <select class="form-control select2" id="select-countries" multiple="multiple">
+                            {% for row in countries %}
+                            <option value="{{ row.id }}" selected>{{ row.location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="card-header bg-white border-top">
+                        <strong>Continent</strong>
+                    </div>
+                    <div class="card-body">
+                        <select class="form-control select2" id="select-continent" multiple="multiple">
+                            {% for row in continent %}
+                            <option value="{{ row.id }}" selected>{{ row.continent }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="card-header bg-white border-top">
+                        <strong>Availability</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="all-stock" name="all-stock" value="in stock" checked>
+                            <label class="form-check-label" for="all-stock">
+                                All Stock
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="availability" name="availability" value="in stock">
+                            <label class="form-check-label" for="availability">
+                                In Stock
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-header bg-white border-top">
+                        <strong>Price Range</strong>
+                        <span class="float-end">
+                            <a href="javascript:void(0);" id="switch-price-range"><i class="fas fa-repeat"></i></a>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div id="price-range-content">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-white currency-text">$</span>
+                                        <input type="text" id="minimum-price" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-white currency-text">$</span>
+                                        <input type="text" id="max-price" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="price-range"></div>
+                        </div>
+                        <div id="price-range-content-invert" class="display-none">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-white currency-text-invert">$</span>
+                                        <input type="text" id="max-price-invert" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-white currency-text-invert">$</span>
+                                        <input type="text" id="minimum-price-invert" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="price-range-invert"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div id="search-content"></div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {% block content %}{% endblock %}
+        {% if title == 'landing' %}
+        <div id="rcstock-carousel" class="carousel carousel-dark slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#rcstock-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#rcstock-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#rcstock-carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#rcstock-carousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                <button type="button" data-bs-target="#rcstock-carousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="2000">
+                    <img src="{% static 'img/slider-1.png' %}" width="100%" height="100%" class="d-block w-100 h-100">
+                </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <img src="{% static 'img/slider-2.png' %}" width="100%" height="100%" class="d-block w-100 h-100">
+                </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <img src="{% static 'img/slider-3.png' %}" width="100%" height="100%" class="d-block w-100 h-100">
+                </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <img src="{% static 'img/slider-4.png' %}" width="100%" height="100%" class="d-block w-100 h-100">
+                </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <img src="{% static 'img/slider-5.png' %}" width="100%" height="100%" class="d-block w-100 h-100">
+                </div>
+            </div>
+        </div>
+        <div class="bg-dark-blue text-secondary px-4 py-5 text-center">
+            <h5 class="text-white">Site Figures</h5>
+            <br><br>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 mb-3">
+                        <h1 class="text-center text-white" style="font-size: 70px;"><strong><em><span class="counter" data-target="{{ search_count }}">0</span></em></strong></h1>
+                        <h6 class="text-center">TOTAL SEARCHES</h6>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <h1 class="text-center text-white" style="font-size: 70px;"><strong><em><span class="counter" data-target="{{ shops.count }}">0</span></em></strong></h1>
+                        <h6 class="text-center">SHOPS / STORES ONLINE</h6>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <h1 class="text-center text-white" style="font-size: 70px;"><strong><em><span class="counter" data-target="{{ countries_count }}">0</span></em></strong></h1>
+                        <h6 class="text-center">COUNTRIES ONLINE</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <br><br>
+            <h5 class="text-center">Most Clicked Products</h5>
+            <br><br>
+            <div class="row">
+            {% for row in most_click_product %}
+                {% get_most_click_product_info row.product_name as data %}
+                <div class="col-lg-3 mb-3 d-flex align-items-stretch">
+                    <div class="card ribbon ribbon-top" style="width: 100%;">
+                        <div class="ribbon-label bg-danger" style="color:white;">
+                            <h4><strong>{{ forloop.counter }}</strong></h4>
+                        </div>
+                        <a href="{{ data.product_link }}" target="_blank">
+                            {% if data.product_photo %}
+                                <center>
+                                    <img src="{{ data.product_photo }}" style="object-fit:cover; width: 150px; height: 150px;" class="card-img-top">
+                                </center>
+                            {% else %}
+                                <div class="card-header text-center">
+                                    Image not available
+                                </div>
+                            {% endif %}
+                        </a>
+<!--                        <span class="card-badge"><h4><strong>{{ forloop.counter }}</strong></h4></span>-->
+                        <div class="card-body pb-0">
+                            <a href="{{ data.product_link }}" style="text-decoration:none; color: #263238;" target="_blank" class="card-title"
+                                data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="{{ data.product_name }}"
+                            >
+                                <strong>{{ data.product_name }}</strong>
+                            </a>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 pb-0">
+                            <h6 style="bottom: 10px;">
+                                {% if data.stock_status == 'Out of Stock' %}
+                                    <span class="text-danger">Out of Stock</span>
+                                {% else %}
+                                    {% if not data.stock_status %}
+                                        <span class="text-danger">Out of Stock</span>
+                                    {% else %}
+                                        <span class="text-success">{{ data.stock_status }}</span>
+                                    {% endif %}
+                                {% endif %}
+                            </span></h6>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 pt-0">
+                            <div class="d-flex justify-content-between">
+                                <div class="float-start">
+                                    {% if data.stock_status != 'Out of Stock' %}
+                                        <a href="javascript:void(0);" data-role="product-click" data-status="{{ data.stock_status }}" data-title="{{ data.product_name }}" data-filter="{{ data.product_link }}" data-photo="{{ data.product_photo }}" data-price="{{ data.product_price }}" class="btn btn-primary" style="margin-top: 10px;">
+                                            <strong>Shop Now</strong>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div class="float-end">
+                                    <p class="card-text">
+                                        {% if data.product_price != 0 %}
+                                        <h4>
+                                            <strong>{{ data.shop.currency }} <span class="price">{{ data.product_price|floatformat:2 }}</span></strong>
+                                        </h4>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+            <br><br><br>
+        </div>
+        {% endif%}
+    {% endif %}
+    <br><br>
+    <div class="bg-dark-blue text-white">
+    <div class="container">
+        <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
+            <div class="col-lg-4 mb-3">
+                <img src="{% static 'img/logo.png' %}" class="mb-4" width="180px;">
+                <p style="text-align: justify;">
+                    RCStock.net is a global RC-product related search tool for Hobbyists, Shops and Manufacturer at the same time  and does offer an easy way to search in hundreds of shops for desired products within seconds. <br><br>RCStock.net is financed by affiliate programs.
+                </p>
+            </div>
+            <div class="col-lg-1 mb-3"></div>
+            <div class="col-lg-3 mb-3">
+                <h5>Useful links</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a href="{% url 'landing' %}" class="nav-link p-0 text-muted">Home</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="{% url 'about' %}" class="nav-link p-0 text-muted">About Us</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="{% url 'data_protection' %}" class="nav-link p-0 text-muted">Data Protection</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-3 mb-3">
+                <h5>Contact Us</h5>
+                <p>
+                    <i class="fas fa-envelope me-3"></i>
+                    support@rcstock.net
+                </p>
+            </div>
+        </footer>
+        <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
+            <p>&copy; 2021 - 2022 RCStock.net</p>
+        </div>
+    </div>
+    </div>
+    <div class="modal" id="beta-search-modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="get" id="betaSearchForm">
+                        <h3 class="text-center"><strong>BETA SEARCH</strong></h3>
+                        <input type="hidden" value="1" name="beta_search">
+                        <h6 class="text-center"><strong>RCStock.net</strong> provide you a better search algorithm where users can get the matching products on different shops.</h6>
+                        <input type="text" class="form-control form-control-lg" id="beta_search_input" name="search_input" placeholder="Search Something...">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'js/jquery.ui.touch-punch.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap3-typeahead.min.js' %}"></script>
+    <script src="{% static 'js/counter.js' %}"></script>
+    <script src="{% static 'js/select2.full.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/sweetalert2/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/toastr/build/toastr.min.js' %}"></script>
+    <script src="{% static 'backend/assets/libs/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'js/jquery.twbsPagination.min.js' %}"></script>
+    <script>
+        {% for msg in messages %}
+            {% if 'welcome' in msg.extra_tags %}
+                $("#liveToastContainer").css('z-index', '1005');
+                new bootstrap.Toast(document.getElementById("liveToast")).show();
+            {% endif %}
+        {% endfor %}
+
+        $('.select2').select2({
+    		width: '100%',
+    		theme: 'bootstrap-5',
+		});
+
+        $('.logout').click(function () {
+            Swal.fire({
+                title: "Are you sure",
+                text: "You want to Sign Out?",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Yes, I will!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    Swal.fire({
+                        title: "Information",
+                        html: "You successfully logout your account !",
+                        icon: "success",
+                        confirmButtonColor: "#3498DB",
+                        allowOutsideClick: false,
+                    }).then((result) => {
+                        if(result.isConfirmed){
+                            window.location = '{% url "logout_user" %}';
+                        }
+                    });
+                }
+            })
+        });
+
+        $("#search_input").typeahead({
+            source: function(query, process){
+                return $.get({
+                    url: '{% url "autocomplete_suggestions" %}',
+                    data: { query: query },
+                    datatype: 'json',
+                    success: function (data) {
+                        return process(data);
+                    }
+                });
+            },
+            afterSelect: function (obj) {
+                $('#search_input').val(obj);
+                $('#searchForm').submit();
+            },
+            highlight: true,
+        });
+
+        $('#search_input').on('keyup', function(e){
+            if(e.keyCode = 13){
+                $('#search_input').typeahead('close');
+            }
+        });
+
+        $("#beta_search_input").typeahead({
+            source: function(query, process){
+                return $.get({
+                    url: '{% url "autocomplete_suggestions" %}',
+                    data: { query: query },
+                    datatype: 'json',
+                    success: function (data) {
+                        return process(data);
+                    }
+                });
+            },
+            afterSelect: function (obj) {
+                $('#beta_search_input').val(obj);
+                $('#betaSearchForm').submit();
+            },
+            highlight: true,
+        });
+
+        $('#beta_search_input').on('keyup', function(e){
+            if(e.keyCode = 13){
+                $('#beta_search_input').typeahead('close');
+            }
+        });
+    </script>
+    {% if request.GET.search_input %}
+    <script>
+        $('.list-group-item').each(function(){
+            var id = $(this).data('id');
+            $.post({
+                url: '/shop/search/results/process/' + $('#search_input').val().trim() + '/' + id + '/' + {{ request.GET.beta_search }},
+                type: 'GET',
+                beforeSend: function(){
+                    $('#search-results-text-' + id).html(`
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `);
+                },
+                success: function(response){
+                    $('#search-results-text-' + response.pk).text("(" + response.total_results + ")");
+                    var default_active = 12;
+                    if(response.pk == default_active){
+                        $('#shop-'+default_active).addClass('active');
+                        callPage('/shop/search/results/' + $('#search_input').val().trim() + '/' + default_active + '/' + {{ request.GET.beta_search }});
+                    }
+                },
+            });
+        });
+
+        $(document).on('click', 'a[data-role=shop-search-content]', function(){
+            $('.list-group-item').each(function(){
+                $(this).removeClass('active');
+            });
+            $('.price-range').text('');
+            $('#shop-'+ $(this).data('id')).addClass('active');
+            if($('#availability').is(':checked')){
+                callPage('/shop/search/results/{{ request.GET.search_input }}/'+ $(this).data('id') + '/' + {{ request.GET.beta_search }});
+            } else {
+                callPage('/shop/search/results/' + $('#search_input').val() + '/' + $(this).data('id') + '/' + {{ request.GET.beta_search }});
+            }
+        });
+
+        function callPage(pageRefInput) {
+            $.ajax({
+                url: pageRefInput,
+                type: "GET",
+                dataType: 'text',
+                beforeSend: function() {
+                    $('#search-content').empty();
+                    $('#search-content').append(`
+                        <div class="spinner-border" id="preloader" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `);
+                },
+                success: function(response) {
+                    $('#search-content').html(response);
+                },
+                complete: function() {
+                    $('#preloader').css('display', 'none');
+                }
+            });
+        }
+
+        $('#all-stock').on('change', function(){
+            if(this.checked) {
+                $('#availability').prop('checked', false);
+                $('.availability').each(function(){
+                    $('#product-content-' + $(this).data('id')).removeClass('display-none');
+                });
+
+                $('.list-group-item').each(function(){
+                    var id = $(this).data('id');
+                    $.post({
+                        url: '/shop/search/results/process/all-stock/' + $('#search_input').val() + '/' + id + '/' + {{ request.GET.beta_search }},
+                        type: 'GET',
+                        success: function(response){
+                            $('#search-results-text-' + response.pk).text("(" + response.total_results + ")");
+                        },
+                    });
+                });
+            }
+        });
+
+        $('#availability').on('change', function(){
+            if(this.checked) {
+                $('#all-stock').prop('checked', false);
+                $('.availability').each(function(){
+                    if ($(this).data('filter') == 'Out of Stock') {
+                        $('#product-content-' + $(this).data('id')).addClass('display-none');
+                    } else {
+                        $('#product-content-' + $(this).data('id')).removeClass('display-none');
+                    }
+                });
+
+                $('.list-group-item').each(function(){
+                    var id = $(this).data('id');
+                    $.post({
+                        url: '/shop/search/results/process/in-stock/' + $('#search_input').val() + '/' + id + '/' + {{ request.GET.beta_search }},
+                        type: 'GET',
+                        success: function(response){
+                            $('#search-results-text-' + response.pk).text("(" + response.total_results + ")");
+                        },
+                    });
+                });
+            } else {
+                $('#all-stock').prop('checked', true);
+                count = 0;
+                pk = '';
+
+                $('.availability').each(function(){
+                    $('#product-content-' + $(this).data('id')).removeClass('display-none');
+                    count += 1;
+                    pk = $(this).data('title');
+                });
+
+                $('#search-results-text-' + pk).text("(" + count + ")");
+            }
+        });
+
+        $('#select-continent').on('select2:select', function(e){
+             var data = e.params.data;
+             $('.list-group-item').each(function(){
+                if($(this).data('continent') == data.text) {
+                    $(this).removeClass('display-none');
+                }
+             });
+        });
+
+        $('#select-continent').on('select2:unselect', function(e){
+             var data = e.params.data;
+             $('.list-group-item').each(function(){
+                if($(this).data('continent') == data.text) {
+                    $(this).addClass('display-none');
+                }
+             });
+        });
+
+        $('#select-countries').on('select2:select', function(e){
+             var data = e.params.data;
+             $('.list-group-item').each(function(){
+                if($(this).data('country') == data.text) {
+                    $(this).removeClass('display-none');
+                }
+             });
+        });
+
+        $('#select-countries').on('select2:unselect', function(e){
+             var data = e.params.data;
+             $('.list-group-item').each(function(){
+                if($(this).data('country') == data.text) {
+                    $(this).addClass('display-none');
+                }
+             });
+        });
+
+        $(document).on('click', 'a[data-role=product-click]', function(e){
+            var link = $(this).data('filter')
+            var id = $(this).data('id')
+            $.post({
+                url: '/shop/product/click/' + id,
+                data: {
+                    'product_name': $(this).data('title'),
+                    'product_link': $(this).data('filter'),
+                    'product_img': $(this).data('photo'),
+                    'product_price': $(this).data('price'),
+                    'product_status': $(this).data('status'),
+                },
+                success: function(response){
+                    if(response.data == "success") {
+                        window.open(link, '_blank');
+                    }
+                }
+            });
+            e.preventDefault();
+        });
+        var toggle = 0;
+
+        $('#switch-price-range').on('click', function(){
+            if(toggle == 0){
+                $('#price-range-content-invert').removeClass('display-none');
+                $('#price-range-content').addClass('display-none');
+                toggle = 1;
+            } else if(toggle == 1) {
+                $('#price-range-content-invert').addClass('display-none');
+                $('#price-range-content').removeClass('display-none');
+                toggle = 0;
+            }
+        });
+    </script>
+    {% endif %}
+    {% block script %}{% endblock %}
+</body>
+</html>

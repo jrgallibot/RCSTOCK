@@ -1,0 +1,98 @@
+{% load tags %}
+<div class="row">
+	<form id="submitEditForm">
+		{% csrf_token %}
+	   	<div class="modal-body">
+			<div class="row">
+				<div class="mb-3">
+					<label>Question <span class="asteriskField">*</span></label>
+					<textarea class="form-control" name="up_question" required placeholder="Write question....">{{faq.question}}</textarea>
+				</div>
+			</div>
+			<div class="row">
+				<div class="mb-3">
+					<label>Answer <span class="asteriskField">*</span></label>
+					<textarea class="form-control" name="up_answer" required placeholder="Write answer....">{{faq.answer}}</textarea>
+				</div>
+			</div>
+			<div class="row">
+				<div class="mb-3">
+					<label>Link</label>
+					<input name="up_link" type="text" class="form-control link" placeholder="Link" value="{% if faq.link %}{{faq.link}}{% endif %}">
+				</div>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" name="up_status" {% if faq.isactive %}checked{% endif %}>
+				<label class="form-check-label" for="flexCheckDefault">
+					Status
+				</label>
+			</div>
+	    </div>
+	    <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-mem-modal">Close</button>
+	        <button type="submit" class="btn btn-primary">Save changes</button>
+	    </div>
+	</form>
+</div>
+{% block script %}
+<script>
+	$(document).ready(function(){
+		$('.summernote').summernote({
+	        height: $(window).height() * 0.3,
+	        dialogsInBody: true,
+	        fontSizeUnits: ['px', 'pt'],
+	        dialogsFade: true,
+	        codeviewFilterRegex: 'custom-regex',
+	        disableDragAndDrop: true,
+	        toolbar: [
+	          ['style', ['style']],
+	          ['font', ['bold', 'underline', 'clear']],
+	          ['color', ['color']],
+	          ['para', ['ul', 'ol', 'paragraph']],
+	          ['table', ['table']],
+	          ['insert', ['link', 'picture', 'video']],
+	          ['view', ['fullscreen', 'codeview', 'help']]
+	        ]
+	    });
+
+	    $('#submitEditForm').on('submit', function(e){
+	        var form = new FormData(this);
+	        Swal.fire({
+	            title: "Are you sure",
+	            text: "You want to edit the FAQ?",
+	            icon: "info",
+	            showCancelButton: true,
+	            confirmButtonText: "Yes",
+	            allowOutsideClick: false,
+	            showLoaderOnConfirm: true,
+	            preConfirm: function (){
+	                return $.post({
+	                    url: "{% url 'update_faq' pk %}",
+	                    data: form,
+	                    success : function (response){
+	                        if(response.data == "success"){
+	                            Swal.fire({
+	                                title: "Good job!",
+	                                html:  response.msg,
+	                                icon: "success",
+	                                allowOutsideClick: false,
+	                            }).then((result) => {
+	                                if (result.isConfirmed){
+	                                    $('#submitEditForm').trigger('reset');
+	                                    $('#faq_list').DataTable().ajax.reload();
+	                                    $('#close-editfaq-modal').click();
+	                                }
+	                            });
+	                        }
+	                    },
+	                    cache       : false,
+	                    contentType : false,
+	                    processData : false,
+	                });
+	            },
+	        });
+	        e.preventDefault();
+	    });
+	});
+</script>
+{% endblock %}

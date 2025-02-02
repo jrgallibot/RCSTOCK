@@ -1,0 +1,132 @@
+{% load static %}
+{% load tags %}
+<div class="row align-items-center justify-content-between">
+    <div class="col-auto">
+        <h3 class="app-page-title mb-0">Market Intelligence Dashboard</h3>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="card">
+        <div class="card-body">
+            <label class="bold">Most clicked product of your shop</label>
+            <div class="chart-container">
+                <canvas id="your_most_click_product"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="card">
+        <div class="card-body">
+            <label class="bold">Most clicked product of other shop</label>
+            <div class="chart-container">
+                <canvas id="other_most_click_product"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="card">
+        <div class="card-body">
+            <label class="bold">In-Stock vs Stock-Out Rate</label>
+            <div class="chart-container">
+                <canvas id="stock_invs_out_stock"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4" id="search-results">
+    <div class="col-sm-3">
+        <div class="card collapse d-md-block" id="filters">
+            <div class="card-header bg-white">
+                <strong>Shops</strong>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for shop in shops %}
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action" data-role="shop-search-content" id="shop-{{ shop.id }}" data-id="{{ shop.id }}" data-continent="{{ shop.continent }}"> {{ shop.name }} <span class="float-end" id="search-results-text-{{ shop.id }}"></span></a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div id="search-content"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    var ctx = document.getElementById("stock_invs_out_stock");
+    var myChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Stock-In', 'Stock-Out'],
+        datasets: [{
+          label: 'Stock In vs Stock Out as of Today',
+          data: [{{stock_in.count}}, {{stock_out.count}}],
+          backgroundColor:["#66b2b2", "#008080"],
+          borderColor: ["#66b2b2", "#008080"],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+
+      }
+    });
+
+    var ctxL = document.getElementById("your_most_click_product").getContext('2d');
+    var Barchart = new Chart(ctxL, {
+        type: 'bar',
+        data: {
+          datasets: {{ datasets|safe }},
+          labels: {{ labels|safe }}
+        },
+        options: {
+            responsive: true,
+        }
+    });
+
+    var ctxL = document.getElementById("other_most_click_product").getContext('2d');
+    var Barchart = new Chart(ctxL, {
+        type: 'horizontalBar',
+        data: {
+          datasets: {{ datasets_other|safe }},
+          labels: {{ labels_other|safe }}
+        },
+        options: {
+            responsive: true,
+        }
+    });
+
+    $(document).ready(function () {
+        $(document).on('click', 'a[data-role=shop-search-content]', function(){
+            $('.list-group-item').each(function(){
+                $(this).removeClass('active');
+            });
+            $('#shop-'+ $(this).data('id')).addClass('active');
+            callPages('/user/market-intelligence/shop/'+ $(this).data('id') + '/' + {{ request.user.id }});
+        });
+    });
+
+    function callPages(pageRefInput) {
+        $.ajax({
+            url: pageRefInput,
+            type: "GET",
+            dataType: 'text',
+            beforeSend: function() {
+                $('#search-content').empty();
+                $('#search-content').append(`
+                    <div class="spinner-border" id="preloader" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                `);
+            },
+            success: function(response) {
+                $('#search-content').html(response);
+            },
+            complete: function() {
+                $('#preloader').css('display', 'none');
+            }
+        });
+    }
+</script>

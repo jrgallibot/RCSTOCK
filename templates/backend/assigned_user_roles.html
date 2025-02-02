@@ -1,0 +1,79 @@
+{% load tags %}
+<div class="row">
+	<form id="submitroleForm">
+		{% csrf_token %}
+	   	<div class="modal-body">
+			<div class="mb-3">
+				<label>Role <span class="asteriskField">*</span></label>
+				<select class="form-select select2" id="up_permission" name="up_permission" required>
+					<option></option>
+					{% for row in permission %}
+						{% if row.id == user_permission.permission_id %}
+							<option value="{{ row.id }}" selected>{{ row.name }}</option>
+						{% else %}
+							<option value="{{ row.id }}">{{ row.name }}</option>
+						{% endif %}
+					{% endfor %}
+				</select>
+			</div>
+	    </div>
+	    <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+	        <button type="submit" class="btn btn-primary">Save changes</button>
+	    </div>
+	</form>
+</div>
+<script type="text/javascript">
+	$('.select2').select2({
+		width: '100%',
+		theme: 'bootstrap-5',
+	    placeholder: 'Choose',
+	    dropdownParent: $('#assigned_roles')
+	});
+
+	$('#submitroleForm').on('submit', function(e){
+		var form = new FormData(this);
+		e.preventDefault();
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to update user role?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            preConfirm: function (){
+                return $.post({
+                    url: "{% url 'assigned_user_roles' pk %}",
+                    data: form,
+                    success : function (response){
+                        if(response.data == "success"){
+                            Swal.fire({
+                                title: "Good job!",
+                                html:  response.msg,
+                                icon: "success",
+                                allowOutsideClick: false,
+                            }).then((result) => {
+                                if (result.isConfirmed){
+                                    $('#submitroleForm').trigger('reset');
+                                    $('#user_list').DataTable().ajax.reload();
+                                    $('#close-role').click();
+                                }
+                            });
+                        }else{
+                        	Swal.fire({
+                        		title: "Oops!",
+                                html:  response.msg,
+                                icon: "error",
+                                allowOutsideClick: false,
+                        	});
+                        }
+                    },
+                    cache       : false,
+                    contentType : false,
+                    processData : false,
+                });
+            },
+        });
+	});
+</script>

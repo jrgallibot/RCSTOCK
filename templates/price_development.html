@@ -1,0 +1,30 @@
+{% load static %}
+<div class="modal-body">
+    <div class="col-lg-12 mb-3 d-flex align-items-stretch">
+        <div class="card mb-4 rounded-3 shadow-sm" style="width: 100%;">
+            <div class="card-header py-3">
+                <h4 class="my-0 fw-normal" id="prod_name">Price Development in <b>{{products.product_name}}</b></h4>
+            </div>
+            <div class="card-body">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% block script %}
+<script src="{% static 'backend/assets/plugins/chart.js/chart.min.js' %}"></script> 
+<script src="{% static 'backend/assets/js/index-charts.js' %}"></script> 
+<script type="text/javascript">
+    var ctxL = document.getElementById("lineChart").getContext('2d');
+    var myLineChart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+          datasets: {{ datasets|safe }},
+          labels: {{ labels|safe }}
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+{% endblock %}

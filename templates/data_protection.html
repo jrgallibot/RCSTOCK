@@ -1,0 +1,9 @@
+{% extends 'landing.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="bold mt-5">Data Protection</h2>
+        <div class="row mt-5">
+            <p>{{geninfo.data_protection|safe}}</p>
+        </div>
+    </div>
+{% endblock %}
